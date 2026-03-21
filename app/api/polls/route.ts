@@ -1,0 +1,19 @@
+import { NextResponse } from 'next/server';
+import { polls } from '@/lib/store';
+
+export async function POST(request: Request) {
+  const { options } = await request.json();
+  // Generate a random 4-character alphanumeric code
+  const code = Math.random().toString(36).substring(2, 6).toUpperCase();
+  
+  polls[code] = {
+    code,
+    options,
+    eliminated: [],
+    rounds: [{ votes: {} }], // Start with round 1 empty
+    status: 'active',
+    winner: null,
+  };
+
+  return NextResponse.json({ code });
+}

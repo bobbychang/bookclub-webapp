@@ -1,0 +1,51 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Profile {
+  id             String         @id @default(uuid())
+  email          String         @unique
+  displayName    String?
+  isAdmin        Boolean        @default(false)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  availabilities Availability[]
+}
+
+model SchedulingPoll {
+  id        String         @id @default(uuid())
+  status    String         @default("IDLE")
+  finalDate DateTime?
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  dates     ProposedDate[]
+}
+
+model ProposedDate {
+  id        String         @id @default(uuid())
+  pollId    String
+  date      DateTime
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  responses Availability[]
+  poll      SchedulingPoll @relation(fields: [pollId], references: [id])
+}
+
+model Availability {
+  id        String       @id @default(uuid())
+  userId    String
+  dateId    String
+  status    String
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  date      ProposedDate @relation(fields: [dateId], references: [id])
+  user      Profile      @relation(fields: [userId], references: [id])
+
+  @@unique([userId, dateId])
+}
