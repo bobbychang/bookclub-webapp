@@ -33,6 +33,19 @@ The project has been transformed from a simple voting app into a full Book Club 
   - `NEXT_PUBLIC_DEV_MODE=false` triggers real Email Auth.
   - `NEXT_PUBLIC_DEV_MODE=true` enables the yellow "Dev Mode Shortcuts" box.
 
+## 🚀 SSH & Deployment Guide (For the AI Agent)
+The project is hosted on an AWS EC2 instance. Use the following details to run commands remotely:
+- **IP Address**: `16.146.60.32`
+- **User**: `ec2-user`
+- **SSH Key**: `C:\Users\Robert\.ssh\aws_bobby_key`
+- **Project Path**: `/home/ec2-user/voting-app-prod`
+- **Command Format**: `ssh -i "C:\Users\Robert\.ssh\aws_bobby_key" ec2-user@16.146.60.32 "cd voting-app-prod && [command]"`
+
+### Common Remote Tasks:
+- **Deploy Updates**: `ssh -i "C:\Users\Robert\.ssh\aws_bobby_key" ec2-user@16.146.60.32 "cd voting-app-prod && ./deploy.sh"`
+- **Check Logs**: `ssh -i "C:\Users\Robert\.ssh\aws_bobby_key" ec2-user@16.146.60.32 "cd voting-app-prod && cat app.log"`
+- **Restart**: `ssh -i "C:\Users\Robert\.ssh\aws_bobby_key" ec2-user@16.146.60.32 "pkill -f 'next-server' || true && cd voting-app-prod && nohup npm run start > app.log 2>&1 &"`
+
 ## 📋 Pending Tasks
 - [ ] **RCV Integration**: Update the Ranked Choice Voting page (`/poll/[code]`) to use the new `Profile` accounts instead of anonymous `localStorage` names.
 - [ ] **Admin Dashboard**: A central place for the host to manage all rounds and polls.

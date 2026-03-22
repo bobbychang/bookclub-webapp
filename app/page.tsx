@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { BOOKCLUB_NAME, CURRENT_BOOK } from '../lib/constants';
 import AuthContainer from '@/components/Auth/AuthContainer';
 import DateSelection from '@/components/Scheduling/DateSelection';
+import Recommendations from '@/components/Recommendations';
 
 export default function Home() {
   const [options, setOptions] = useState(['', '', '']);
@@ -94,6 +95,8 @@ export default function Home() {
               </div>
             </div>
           </div>
+          
+          <Recommendations profile={profile} />
         </div>
       )}
     </AuthContainer>
