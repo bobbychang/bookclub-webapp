@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createClient } from '@/utils/supabase/client';
 
 export default function EmailLogin({ onLoginSuccess }: { onLoginSuccess: () => void }) {
@@ -10,6 +10,21 @@ export default function EmailLogin({ onLoginSuccess }: { onLoginSuccess: () => v
 
   const supabase = createClient();
   const isDevMode = process.env.NEXT_PUBLIC_DEV_MODE === 'true';
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const hash = window.location.hash;
+      const query = window.location.search;
+      
+      const paramsToSearch = hash.includes('error=') ? new URLSearchParams(hash.substring(1)) : new URLSearchParams(query);
+      
+      if (paramsToSearch.has('error')) {
+        const errDesc = paramsToSearch.get('error_description') || paramsToSearch.get('error');
+        setError(`Login verification failed: ${errDesc?.replace(/\+/g, ' ')}`);
+        window.history.replaceState(null, '', window.location.pathname);
+      }
+    }
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
