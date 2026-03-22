@@ -7,30 +7,32 @@ import DateSelection from '@/components/Scheduling/DateSelection';
 import Recommendations from '@/components/Recommendations';
 
 export default function Home() {
-  const [options, setOptions] = useState(['', '', '']);
-  const [joinCode, setJoinCode] = useState('');
   const [settings, setSettings] = useState<any>(null);
+  const [activePollCode, setActivePollCode] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
-    fetch('/api/settings')
+    fetch('/bookclub/api/settings')
       .then(res => res.ok ? res.json() : null)
       .then(data => {
         if (data && !data.error) setSettings(data);
       })
       .catch(() => {});
+
+    fetch('/bookclub/api/polls')
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (data && data.activeCode) setActivePollCode(data.activeCode);
+      })
+      .catch(() => {});
   }, []);
 
   const handleCreate = async () => {
-    const validOptions = options.filter(o => o.trim() !== '');
-    if (validOptions.length < 2) return alert('Need at least 2 options');
-    
-    const res = await fetch('/api/polls', {
+    const res = await fetch('/bookclub/api/polls', {
       method: 'POST',
-      body: JSON.stringify({ options: validOptions }),
+      body: JSON.stringify({ options: [] }),
     });
     const { code } = await res.json();
-    // Pass admin flag so the creator can see the "End Round" button
     router.push(`/poll/${code}?admin=true`); 
   };
 
@@ -64,52 +66,28 @@ export default function Home() {
             <DateSelection profile={profile} />
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8 mt-8">
-            <div className="p-6 border-2 border-gray-100 rounded-3xl bg-white shadow-xl hover:shadow-2xl transition-shadow duration-300 space-y-4 flex flex-col justify-between">
-              <div className="space-y-4">
-                <h2 className="text-2xl font-bold text-gray-800">Join a Poll</h2>
-                <p className="text-gray-500 text-sm">Enter a 4-letter code shared by your book club organizer to cast your vote.</p>
-                <input 
-                  className="border-2 border-gray-200 p-3 w-full rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" 
-                  placeholder="Enter 4-letter code" 
-                  value={joinCode} 
-                  onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
-                  maxLength={4}
-                />
-              </div>
-              <button 
-                onClick={() => router.push(`/poll/${joinCode}`)} 
-                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-lg transform active:scale-95 transition-all"
-              >
-                Join Voting
-              </button>
-            </div>
-
-            <div className="p-6 border-2 border-gray-100 rounded-3xl bg-white shadow-xl hover:shadow-2xl transition-shadow duration-300 space-y-4">
-              <h2 className="text-2xl font-bold text-gray-800">New Poll</h2>
-              <p className="text-gray-500 text-sm">Nominate books for the next meeting. Add at least two options.</p>
-              <div className="space-y-3">
-                {options.map((opt, i) => (
-                  <input 
-                    key={i} 
-                    className="border-2 border-gray-200 p-3 w-full rounded-xl focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all" 
-                    placeholder={`Option ${i + 1}`} 
-                    value={opt} 
-                    onChange={(e) => {
-                      const newOpts = [...options];
-                      newOpts[i] = e.target.value;
-                      setOptions(newOpts);
-                    }} 
-                  />
-                ))}
-              </div>
-              <div className="flex flex-col gap-3">
-                <button onClick={() => setOptions([...options, ''])} className="text-blue-600 text-sm font-bold hover:text-blue-800 transition-colors">+ Add More Options</button>
-                <button onClick={handleCreate} className="w-full bg-black hover:bg-gray-800 text-white p-4 rounded-xl font-bold shadow-lg transform active:scale-95 transition-all">
-                  Create New Round
+          <div className="mt-12 p-8 border-2 border-gray-100 rounded-3xl bg-white shadow-xl flex flex-col items-center justify-center text-center space-y-4">
+            <h2 className="text-2xl font-bold text-gray-800">Book Selection</h2>
+            {activePollCode ? (
+              <>
+                <p className="text-gray-500">There is currently an active book selection process underway!</p>
+                <button 
+                  onClick={() => router.push(`/poll/${activePollCode}`)} 
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl shadow-lg transform active:scale-95 transition-all"
+                >
+                  Go to Active Poll
                 </button>
-              </div>
-            </div>
+              </>
+            ) : (
+              <>
+                <p className="text-gray-500">No active book selection is currently running.</p>
+                {profile.isAdmin && (
+                  <button onClick={handleCreate} className="mt-4 bg-black hover:bg-gray-800 text-white px-8 py-3 rounded-xl font-bold shadow-lg transform active:scale-95 transition-all">
+                    Start Next Book Selection
+                  </button>
+                )}
+              </>
+            )}
           </div>
           
           <Recommendations profile={profile} />

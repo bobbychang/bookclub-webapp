@@ -18,3 +18,8 @@ export async function POST(request: Request) {
 
   return NextResponse.json({ code });
 }
+
+export async function GET() {
+  const activePoll = Object.values(polls).find((p: any) => p.status !== 'finished');
+  return NextResponse.json({ activeCode: activePoll ? (activePoll as any).code : null });
+}

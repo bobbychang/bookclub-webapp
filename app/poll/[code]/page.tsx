@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect, use } from 'react';
 import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import AuthContainer from '@/components/Auth/AuthContainer';
 
 function PollView({ code, profile }: { code: string, profile: any }) {
@@ -14,7 +15,7 @@ function PollView({ code, profile }: { code: string, profile: any }) {
 
   useEffect(() => {
     const fetchPoll = async () => {
-      const res = await fetch(`/api/polls/${code}`);
+      const res = await fetch(`/bookclub/api/polls/${code}`);
       if (res.ok) setPoll(await res.json());
     };
     fetchPoll();
@@ -23,7 +24,7 @@ function PollView({ code, profile }: { code: string, profile: any }) {
   }, [code]);
 
   useEffect(() => {
-    fetch('/api/recommendations')
+    fetch('/bookclub/api/recommendations')
       .then(res => res.ok ? res.json() : [])
       .then(data => {
         if (Array.isArray(data)) setRecommendations(data);
@@ -34,7 +35,7 @@ function PollView({ code, profile }: { code: string, profile: any }) {
   if (!poll) return <div className="text-center mt-20 font-bold">Loading Poll Data...</div>;
 
   const handleNominate = async (title: string) => {
-    await fetch(`/api/polls/${code}`, {
+    await fetch(`/bookclub/api/polls/${code}`, {
       method: 'POST',
       body: JSON.stringify({ action: 'nominate', name: profile.displayName, title, recommenderId: profile.id }),
     });
@@ -43,12 +44,12 @@ function PollView({ code, profile }: { code: string, profile: any }) {
 
   const handleStartVoting = async () => {
     if (!confirm('Start the voting phase? This cannot be undone.')) return;
-    await fetch(`/api/polls/${code}`, { method: 'PATCH' });
+    await fetch(`/bookclub/api/polls/${code}`, { method: 'PATCH' });
   };
 
   const handleVote = async (option: string) => {
     setMyVote(option);
-    await fetch(`/api/polls/${code}`, {
+    await fetch(`/bookclub/api/polls/${code}`, {
       method: 'POST',
       body: JSON.stringify({ action: 'vote', name: profile.displayName, option }),
     });
@@ -57,7 +58,7 @@ function PollView({ code, profile }: { code: string, profile: any }) {
   const handleEndRound = async () => {
     if (!confirm('End current round and eliminate the lowest votes?')) return;
     setMyVote(''); 
-    await fetch(`/api/polls/${code}`, { method: 'PATCH' });
+    await fetch(`/bookclub/api/polls/${code}`, { method: 'PATCH' });
   };
 
   const currentRoundIndex = poll.rounds.length - 1;
@@ -67,7 +68,12 @@ function PollView({ code, profile }: { code: string, profile: any }) {
   return (
     <div className="max-w-lg mx-auto mt-10 p-6 space-y-6 font-sans">
       <div className="flex justify-between items-center border-b pb-4">
-        <h1 className="text-2xl font-bold">Poll: {poll.code}</h1>
+        <div className="flex items-center gap-3">
+          <Link href="/" className="text-gray-400 hover:text-black transition-colors" title="Back to Home">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+          </Link>
+          <h1 className="text-2xl font-bold">Poll: {poll.code}</h1>
+        </div>
         {isAdmin && poll.status === 'nominating' && (
           <button onClick={handleStartVoting} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-colors">
             Start Voting Phase

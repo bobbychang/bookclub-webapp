@@ -35,6 +35,8 @@ export default function UserAvailability({
     if (!existing) {
         payload.id = crypto.randomUUID();
         payload.createdAt = now;
+    } else {
+        payload.id = existing.id;
     }
 
     const { error } = await supabase
