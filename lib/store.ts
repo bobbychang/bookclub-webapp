@@ -7,7 +7,8 @@ export type Poll = {
   options: string[]; // Currently active options
   eliminated: string[];
   rounds: Round[]; // History of rounds
-  status: 'active' | 'finished';
+  status: 'nominating' | 'voting' | 'finished';
+  nominations: Record<string, { title: string | null }>;
   winner: string | null;
 };
 

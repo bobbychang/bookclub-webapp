@@ -15,7 +15,7 @@ export default function Home() {
     const validOptions = options.filter(o => o.trim() !== '');
     if (validOptions.length < 2) return alert('Need at least 2 options');
     
-    const res = await fetch('/api/polls', {
+    const res = await fetch('/bookclub/api/polls', {
       method: 'POST',
       body: JSON.stringify({ options: validOptions }),
     });

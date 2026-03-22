@@ -11,7 +11,7 @@ export default function Recommendations({ profile }: { profile: any }) {
   }, []);
 
   const fetchRecommendations = async () => {
-    const res = await fetch('/api/recommendations');
+    const res = await fetch('/bookclub/api/recommendations');
     if (res.ok) {
       setRecommendations(await res.json());
     }
@@ -22,7 +22,7 @@ export default function Recommendations({ profile }: { profile: any }) {
     if (!title.trim()) return;
 
     setLoading(true);
-    const res = await fetch('/api/recommendations', {
+    const res = await fetch('/bookclub/api/recommendations', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

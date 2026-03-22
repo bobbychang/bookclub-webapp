@@ -11,7 +11,8 @@ export async function POST(request: Request) {
     options,
     eliminated: [],
     rounds: [{ votes: {} }], // Start with round 1 empty
-    status: 'active',
+    status: 'nominating',
+    nominations: {},
     winner: null,
   };
 

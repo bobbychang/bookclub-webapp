@@ -60,3 +60,10 @@ model Recommendation {
   
   recommender   Profile  @relation(fields: [recommenderId], references: [id])
 }
+
+model Settings {
+  id                  String   @id @default(uuid())
+  currentBookTitle    String   @default("The Phoenix Project")
+  currentBookAuthor   String   @default("Gene Kim")
+  currentBookCoverUrl String   @default("https://m.media-amazon.com/images/I/71XyEuH82CL._AC_UF1000,1000_QL80_.jpg")
+}
