@@ -1,7 +1,7 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { BOOKCLUB_NAME, CURRENT_BOOK } from '../lib/constants';
+import { BOOKCLUB_NAME } from '../lib/constants';
 import AuthContainer from '@/components/Auth/AuthContainer';
 import DateSelection from '@/components/Scheduling/DateSelection';
 import Recommendations from '@/components/Recommendations';
@@ -9,13 +9,23 @@ import Recommendations from '@/components/Recommendations';
 export default function Home() {
   const [options, setOptions] = useState(['', '', '']);
   const [joinCode, setJoinCode] = useState('');
+  const [settings, setSettings] = useState<any>(null);
   const router = useRouter();
+
+  useEffect(() => {
+    fetch('/api/settings')
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (data && !data.error) setSettings(data);
+      })
+      .catch(() => {});
+  }, []);
 
   const handleCreate = async () => {
     const validOptions = options.filter(o => o.trim() !== '');
     if (validOptions.length < 2) return alert('Need at least 2 options');
     
-    const res = await fetch('/bookclub/api/polls', {
+    const res = await fetch('/api/polls', {
       method: 'POST',
       body: JSON.stringify({ options: validOptions }),
     });
@@ -30,19 +40,25 @@ export default function Home() {
         <div className="max-w-2xl mx-auto mt-10 p-6 space-y-12 font-sans pb-20">
           <div className="text-center space-y-4">
             <h1 className="text-4xl font-extrabold tracking-tight text-gray-900">{BOOKCLUB_NAME}</h1>
-            <p className="text-xl text-gray-600 font-medium">
-              The next book is <span className="text-blue-600 font-bold">{CURRENT_BOOK.title}</span> by {CURRENT_BOOK.author}
-            </p>
+            {settings ? (
+              <p className="text-xl text-gray-600 font-medium animate-fade-in">
+                The next book is <span className="text-blue-600 font-bold">{settings.currentBookTitle}</span> by {settings.currentBookAuthor}
+              </p>
+            ) : (
+              <p className="text-xl text-gray-600 font-medium animate-pulse">Loading current book...</p>
+            )}
           </div>
 
           <div className="flex flex-col items-center gap-8">
-            <div className="relative w-64 h-96 overflow-hidden rounded-2xl shadow-2xl transition-transform hover:scale-105 duration-300">
-              <img 
-                src={CURRENT_BOOK.coverImage} 
-                alt={`Cover of ${CURRENT_BOOK.title}`}
-                className="w-full h-full object-cover"
-              />
-            </div>
+            {settings && (
+              <div className="relative w-64 h-96 overflow-hidden rounded-2xl shadow-2xl transition-transform hover:scale-105 duration-300">
+                <img 
+                  src={settings.currentBookCoverUrl} 
+                  alt={`Cover of ${settings.currentBookTitle}`}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            )}
 
             {/* Date Selection Feature */}
             <DateSelection profile={profile} />
