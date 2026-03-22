@@ -40,6 +40,20 @@ export default function Recommendations({ profile }: { profile: any }) {
     setLoading(false);
   };
 
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to remove this recommendation?')) return;
+    const res = await fetch('/bookclub/api/recommendations', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, userId: profile.id, isAdmin: profile.isAdmin })
+    });
+    if (res.ok) {
+      await fetchRecommendations();
+    } else {
+      alert("Failed to delete recommendation.");
+    }
+  };
+
   return (
     <div className="mt-12 p-6 border-2 border-gray-100 rounded-3xl bg-white shadow-xl">
       <h2 className="text-2xl font-bold text-gray-800 mb-2">Community Recommendations</h2>
@@ -75,8 +89,19 @@ export default function Recommendations({ profile }: { profile: any }) {
                   {rec.author ? `by ${rec.author}` : <span className="italic">Unknown Author</span>}
                 </p>
               </div>
-              <div className="text-sm border bg-white px-3 py-1 rounded-full text-gray-500 shadow-sm flex-shrink-0">
-                Recommended by <span className="font-bold text-gray-700">{rec.recommender?.displayName || 'Unknown'}</span>
+              <div className="flex items-center gap-3">
+                <div className="text-sm border bg-white px-3 py-1 rounded-full text-gray-500 shadow-sm flex-shrink-0">
+                  Recommended by <span className="font-bold text-gray-700">{rec.recommender?.displayName || 'Unknown'}</span>
+                </div>
+                {(profile.isAdmin || profile.id === rec.recommenderId) && (
+                  <button 
+                    onClick={() => handleDelete(rec.id)}
+                    className="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-lg transition-colors"
+                    title="Remove Recommendation"
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                  </button>
+                )}
               </div>
             </div>
           ))

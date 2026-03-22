@@ -58,3 +58,23 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Failed to create recommendation' }, { status: 500 });
   }
 }
+
+export async function DELETE(request: Request) {
+  try {
+    const { id, userId, isAdmin } = await request.json();
+    if (!id || !userId) return NextResponse.json({ error: 'Missing parameters' }, { status: 400 });
+
+    const rec = await prisma.recommendation.findUnique({ where: { id } });
+    if (!rec) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+
+    if (rec.recommenderId !== userId && !isAdmin) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    }
+
+    await prisma.recommendation.delete({ where: { id } });
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Failed to delete recommendation:", error);
+    return NextResponse.json({ error: 'Failed to delete recommendation' }, { status: 500 });
+  }
+}
