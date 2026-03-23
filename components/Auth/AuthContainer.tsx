@@ -4,7 +4,15 @@ import { createClient } from '@/utils/supabase/client';
 import EmailLogin from './EmailLogin';
 import ProfileSetup from './ProfileSetup';
 
-export default function AuthContainer({ children }: { children: (profile: any) => React.ReactNode }) {
+export interface AuthContextType {
+  session: any;
+  profile: any;
+  loading: boolean;
+  checkUser: () => Promise<void>;
+  handleSignOut: () => Promise<void>;
+}
+
+export default function AuthContainer({ children }: { children: (auth: AuthContextType) => React.ReactNode }) {
   const [session, setSession] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -14,7 +22,6 @@ export default function AuthContainer({ children }: { children: (profile: any) =
   const checkUser = async () => {
     setLoading(true);
     
-    // Check Dev Mode Bypass
     if (isDevMode) {
         const devSessionStr = localStorage.getItem('dev-session');
         if (devSessionStr) {
@@ -74,31 +81,5 @@ export default function AuthContainer({ children }: { children: (profile: any) =
     }
   };
 
-  if (loading) return <div className="text-center p-10 font-bold">Loading...</div>;
-
-  if (!session) {
-    return <EmailLogin onLoginSuccess={checkUser} />;
-  }
-
-  if (!profile) {
-    return <ProfileSetup onComplete={checkUser} />;
-  }
-
-  return (
-    <>
-      <div className="max-w-2xl mx-auto px-6 pt-4 flex justify-between items-center text-sm font-medium">
-        <div className="flex items-center gap-2">
-            <span className="text-muted-foreground">Signed in as <span className="text-blue-600 font-bold">{profile.displayName}</span></span>
-            {session.user.isDev && <span className="bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded text-[10px] font-bold uppercase">Dev Mode</span>}
-        </div>
-        <button 
-          onClick={handleSignOut}
-          className="text-red-500 hover:text-red-700"
-        >
-          Sign Out
-        </button>
-      </div>
-      {children(profile)}
-    </>
-  );
+  return <>{children({ session, profile, loading, checkUser, handleSignOut })}</>;
 }

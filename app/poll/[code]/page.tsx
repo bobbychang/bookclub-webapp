@@ -37,7 +37,7 @@ function PollView({ code, profile }: { code: string, profile: any }) {
   const handleNominate = async (title: string) => {
     await fetch(`/bookclub/api/polls/${code}`, {
       method: 'POST',
-      body: JSON.stringify({ action: 'nominate', name: profile.displayName, title, recommenderId: profile.id }),
+      body: JSON.stringify({ action: 'nominate', name: profile?.displayName, title, recommenderId: profile?.id }),
     });
     setNominationTitle('');
   };
@@ -51,7 +51,7 @@ function PollView({ code, profile }: { code: string, profile: any }) {
     setMyVote(option);
     await fetch(`/bookclub/api/polls/${code}`, {
       method: 'POST',
-      body: JSON.stringify({ action: 'vote', name: profile.displayName, option }),
+      body: JSON.stringify({ action: 'vote', name: profile?.displayName, option }),
     });
   };
 
@@ -98,6 +98,11 @@ function PollView({ code, profile }: { code: string, profile: any }) {
         </div>
       ) : poll.status === 'nominating' ? (
         <div className="space-y-6">
+          {!profile?.displayName && (
+             <div className="bg-yellow-50 text-yellow-800 p-4 rounded-xl border border-yellow-200 text-sm font-bold text-center shadow-sm">
+                You must set a display name exclusively on the Home Page before participating in polls!
+             </div>
+          )}
           <div className="bg-background p-6 rounded-xl border border-border shadow-sm space-y-4">
             <h2 className="text-xl font-bold text-foreground">Nominate a Book</h2>
             <p className="text-sm text-muted-foreground">Pick from existing community recommendations, or enter a new title to automatically add it via OpenLibrary.</p>
@@ -106,8 +111,9 @@ function PollView({ code, profile }: { code: string, profile: any }) {
               <input 
                 value={nominationTitle}
                 onChange={e => setNominationTitle(e.target.value)}
-                placeholder="Type a book title..."
-                className="w-full border-2 border-border rounded-lg p-3 outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium"
+                placeholder={profile?.displayName ? "Type a book title..." : "Identity Required"}
+                disabled={!profile?.displayName}
+                className="w-full border-2 border-border rounded-lg p-3 outline-none focus:ring-2 focus:ring-primary transition-all font-medium disabled:opacity-50"
                 list="recommendations-list"
               />
               <datalist id="recommendations-list">
@@ -116,15 +122,15 @@ function PollView({ code, profile }: { code: string, profile: any }) {
                 ))}
               </datalist>
               <div className="flex gap-3">
-                <button onClick={() => handleNominate(nominationTitle)} disabled={!nominationTitle.trim()} className="flex-1 bg-primary text-primary-foreground font-bold py-3 rounded-lg hover:opacity-90 disabled:opacity-50 transition-all">
+                <button onClick={() => handleNominate(nominationTitle)} disabled={!nominationTitle.trim() || !profile?.displayName} className="flex-1 bg-primary text-primary-foreground font-bold py-3 rounded-lg hover:opacity-90 disabled:opacity-50 transition-all">
                   Submit Nomination
                 </button>
-                <button onClick={() => handleNominate('SKIP')} className="flex-1 bg-muted text-foreground font-bold py-3 rounded-lg hover:bg-gray-300 transition-all">
+                <button onClick={() => handleNominate('SKIP')} disabled={!profile?.displayName} className="flex-1 bg-muted text-foreground font-bold py-3 rounded-lg hover:opacity-90 disabled:opacity-50 transition-all">
                   Skip
                 </button>
               </div>
             </div>
-            {poll.nominations[profile.displayName] && (
+            {profile?.displayName && poll.nominations[profile.displayName] && (
                <div className="mt-4 p-3 bg-blue-50 text-blue-800 rounded-lg text-sm font-medium border border-blue-100">
                  You nominated: {poll.nominations[profile.displayName].title || 'Skipped'}
                </div>
@@ -146,15 +152,22 @@ function PollView({ code, profile }: { code: string, profile: any }) {
         </div>
       ) : (
         <div className="space-y-4">
-          <h3 className="font-semibold text-lg mt-4 text-foreground">Casting vote as <span className="text-blue-600">{profile.displayName}</span></h3>
+          {!profile?.displayName ? (
+             <div className="bg-yellow-50 text-yellow-800 p-4 rounded-xl border border-yellow-200 text-sm font-bold text-center shadow-sm">
+                You must set a display name exclusively on the Home Page before participating in polls!
+             </div>
+          ) : (
+             <h3 className="font-semibold text-lg mt-4 text-foreground">Casting vote as <span className="text-primary">{profile.displayName}</span></h3>
+          )}
           <div className="space-y-2">
             {poll.options.map((opt: string) => (
               <button 
                 key={opt}
                 onClick={() => handleVote(opt)}
+                disabled={!profile?.displayName}
                 className={`w-full p-4 border-2 rounded-xl text-left font-medium transition-all ${
-                  currentVotes[profile.displayName] === opt ? 'bg-primary text-primary-foreground border-blue-600 shadow-md transform scale-[1.02]' : 'hover:bg-secondary hover:border-blue-300'
-                }`}
+                  currentVotes[profile?.displayName] === opt ? 'bg-primary text-primary-foreground border-blue-600 shadow-md transform scale-[1.02]' : 'hover:bg-secondary hover:border-blue-300'
+                } disabled:opacity-50 disabled:hover:scale-100`}
               >
                 {opt}
               </button>
@@ -211,7 +224,7 @@ export default function PollPage({ params }: { params: Promise<{ code: string }>
   const { code } = use(params);
   return (
     <AuthContainer>
-      {(profile) => <PollView code={code} profile={profile} />}
+      {(auth) => <PollView code={code} profile={auth.profile} />}
     </AuthContainer>
   );
 }

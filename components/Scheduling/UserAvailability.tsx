@@ -56,15 +56,20 @@ export default function UserAvailability({
         status: 'FINALIZED',
         finalDate: dateStr,
         updatedAt: now
-    }).eq('id', poll.id);
+    } as never).eq('id', poll.id);
     onUpdate();
   };
 
   return (
     <div className="space-y-6">
+      {!profile?.displayName && (
+         <div className="bg-yellow-50 text-yellow-800 p-4 rounded-xl border border-yellow-200 text-sm font-bold text-center">
+            You must set a display name above before marking your availability!
+         </div>
+      )}
       <div className="space-y-4">
         {poll.dates.map((d: any) => {
-            const userVote = d.responses.find((r: any) => r.userId === profile.id)?.status;
+            const userVote = d.responses.find((r: any) => r.userId === profile?.id)?.status;
             
             return (
                 <div key={d.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border border-border rounded-2xl bg-secondary gap-4">
@@ -76,24 +81,27 @@ export default function UserAvailability({
                     <div className="flex items-center gap-2">
                         <button
                             onClick={() => handleVote(d.id, 'YES')}
-                            className={`p-2 rounded-lg transition-all ${userVote === 'YES' ? 'bg-green-500 text-primary-foreground shadow-lg' : 'bg-background text-muted-foreground border border-border hover:bg-green-50'}`}
+                            disabled={!profile?.displayName}
+                            className={`p-2 rounded-lg transition-all ${userVote === 'YES' ? 'bg-green-500 text-primary-foreground shadow-lg' : 'bg-background text-muted-foreground border border-border hover:bg-green-50'} disabled:opacity-50 cursor-pointer`}
                         >
                             <Check size={20} />
                         </button>
                         <button
                             onClick={() => handleVote(d.id, 'MAYBE')}
-                            className={`p-2 rounded-lg transition-all ${userVote === 'MAYBE' ? 'bg-yellow-500 text-primary-foreground shadow-lg' : 'bg-background text-muted-foreground border border-border hover:bg-yellow-50'}`}
+                            disabled={!profile?.displayName}
+                            className={`p-2 rounded-lg transition-all ${userVote === 'MAYBE' ? 'bg-yellow-500 text-primary-foreground shadow-lg' : 'bg-background text-muted-foreground border border-border hover:bg-yellow-50'} disabled:opacity-50 cursor-pointer`}
                         >
                             <Minus size={20} />
                         </button>
                         <button
                             onClick={() => handleVote(d.id, 'NO')}
-                            className={`p-2 rounded-lg transition-all ${userVote === 'NO' ? 'bg-red-500 text-primary-foreground shadow-lg' : 'bg-background text-muted-foreground border border-border hover:bg-red-50'}`}
+                            disabled={!profile?.displayName}
+                            className={`p-2 rounded-lg transition-all ${userVote === 'NO' ? 'bg-red-500 text-primary-foreground shadow-lg' : 'bg-background text-muted-foreground border border-border hover:bg-red-50'} disabled:opacity-50 cursor-pointer`}
                         >
                             <X size={20} />
                         </button>
 
-                        {profile.isAdmin && poll.status === 'VOTING' && (
+                        {profile?.isAdmin && poll.status === 'VOTING' && (
                             <button
                                 onClick={() => handleFinalize(d.id, d.date)}
                                 className="ml-4 text-[10px] font-bold uppercase tracking-wider bg-primary text-primary-foreground px-3 py-2 rounded-lg hover:opacity-90"

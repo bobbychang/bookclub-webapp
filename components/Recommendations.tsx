@@ -27,7 +27,7 @@ export default function Recommendations({ profile }: { profile: any }) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         title: title.trim(),
-        recommenderId: profile.id
+        recommenderId: profile?.id
       })
     });
 
@@ -45,7 +45,7 @@ export default function Recommendations({ profile }: { profile: any }) {
     const res = await fetch('/bookclub/api/recommendations', {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id, userId: profile.id, isAdmin: profile.isAdmin })
+      body: JSON.stringify({ id, userId: profile?.id, isAdmin: profile?.isAdmin })
     });
     if (res.ok) {
       await fetchRecommendations();
@@ -64,13 +64,13 @@ export default function Recommendations({ profile }: { profile: any }) {
           type="text"
           value={title}
           onChange={e => setTitle(e.target.value)}
-          placeholder="Enter a book title..."
-          className="flex-1 border-2 border-border p-3 rounded-xl focus:ring-2 focus:ring-black outline-none transition-all"
-          disabled={loading}
+          placeholder={profile?.displayName ? "Enter a book title..." : "Set a display name above to recommend!"}
+          className="flex-1 border-2 border-border p-3 rounded-xl focus:ring-2 focus:ring-primary outline-none transition-all disabled:opacity-50"
+          disabled={loading || !profile?.displayName}
         />
         <button 
           type="submit" 
-          disabled={loading}
+          disabled={loading || !profile?.displayName}
           className="bg-primary text-primary-foreground px-6 font-bold rounded-xl shadow-lg hover:opacity-90 disabled:bg-gray-400 transition-all active:scale-95"
         >
           {loading ? 'Adding...' : 'Recommend'}
@@ -93,7 +93,7 @@ export default function Recommendations({ profile }: { profile: any }) {
                 <div className="text-sm border bg-background px-3 py-1 rounded-full text-muted-foreground shadow-sm flex-shrink-0">
                   Recommended by <span className="font-bold text-foreground">{rec.recommender?.displayName || 'Unknown'}</span>
                 </div>
-                {(profile.isAdmin || profile.id === rec.recommenderId) && (
+                {(profile?.isAdmin || profile?.id === rec.recommenderId) && (
                   <button 
                     onClick={() => handleDelete(rec.id)}
                     className="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-lg transition-colors"
