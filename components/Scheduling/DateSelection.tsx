@@ -74,15 +74,15 @@ export default function DateSelection({ profile }: { profile: any }) {
 
   if (!poll || poll.status === 'IDLE') {
     return (
-      <div className="w-full max-w-lg p-8 border-2 border-gray-100 bg-white rounded-3xl shadow-lg text-center space-y-4 mx-auto">
-        <h2 className="text-2xl font-bold text-gray-800 flex items-center justify-center gap-2">
+      <div className="w-full max-w-lg p-8 border-2 border-border bg-background rounded-3xl shadow-lg text-center space-y-4 mx-auto">
+        <h2 className="text-2xl font-bold text-foreground flex items-center justify-center gap-2">
             <Calendar className="text-blue-600" /> Date Selection
         </h2>
-        <p className="text-gray-500 italic">The host is choosing dates for the next book club.</p>
+        <p className="text-muted-foreground italic">The host is choosing dates for the next book club.</p>
         {profile.isAdmin && (
           <button 
             onClick={handleStartProposing}
-            className="bg-black hover:bg-gray-800 text-white px-8 py-3 rounded-2xl font-bold text-sm shadow-lg transition-all flex items-center gap-2 mx-auto"
+            className="bg-primary hover:opacity-90 text-primary-foreground px-8 py-3 rounded-2xl font-bold text-sm shadow-lg transition-all flex items-center gap-2 mx-auto"
             disabled={loading}
           >
             {loading && <Loader2 className="animate-spin w-4 h-4" />}
@@ -96,14 +96,14 @@ export default function DateSelection({ profile }: { profile: any }) {
   if (poll.status === 'FINALIZED') {
     return (
         <div className="w-full max-w-lg p-8 border-2 border-green-100 bg-green-50/20 rounded-3xl shadow-lg text-center space-y-4 mx-auto">
-          <h2 className="text-2xl font-bold text-gray-900 flex items-center justify-center gap-2">
+          <h2 className="text-2xl font-bold text-foreground flex items-center justify-center gap-2">
               🎉 Date Confirmed!
           </h2>
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-green-50">
-            <p className="text-gray-500 font-medium uppercase text-xs tracking-widest mb-1">The next book club is</p>
+          <div className="bg-background p-6 rounded-2xl shadow-sm border border-green-50">
+            <p className="text-muted-foreground font-medium uppercase text-xs tracking-widest mb-1">The next book club is</p>
             <p className="text-2xl font-extrabold text-green-700">{format(new Date(poll.finalDate), 'EEEE, MMMM do')}</p>
           </div>
-          <p className="text-sm text-gray-600 font-medium italic pt-2">
+          <p className="text-sm text-muted-foreground font-medium italic pt-2">
             Availability for this date:
           </p>
           <div className="flex flex-wrap justify-center gap-2">
@@ -121,7 +121,7 @@ export default function DateSelection({ profile }: { profile: any }) {
             <div className="pt-6 border-t border-green-100/50 mt-4">
                 <button 
                     onClick={handleStartProposing}
-                    className="text-[10px] font-bold uppercase tracking-wider bg-black text-white px-4 py-2 rounded-xl hover:bg-gray-800 flex items-center gap-2 mx-auto"
+                    className="text-[10px] font-bold uppercase tracking-wider bg-primary text-primary-foreground px-4 py-2 rounded-xl hover:opacity-90 flex items-center gap-2 mx-auto"
                     disabled={loading}
                 >
                     {loading && <Loader2 className="animate-spin w-3 h-3" />}
@@ -135,8 +135,8 @@ export default function DateSelection({ profile }: { profile: any }) {
 
   return (
     <div className="w-full max-w-2xl mx-auto space-y-8">
-      <div className="p-8 border-2 border-gray-100 bg-white rounded-3xl shadow-xl space-y-6">
-        <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+      <div className="p-8 border-2 border-border bg-background rounded-3xl shadow-xl space-y-6">
+        <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
             <Calendar className="text-blue-600" />
             {poll.status === 'PROPOSING' ? 'Choose Potential Dates' : 'Mark Your Availability'}
         </h2>

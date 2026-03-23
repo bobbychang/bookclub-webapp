@@ -56,9 +56,9 @@ export default function ProfileSetup({ onComplete }: { onComplete: () => void })
   };
 
   return (
-    <div className="p-6 border-2 border-gray-100 rounded-3xl bg-white shadow-xl space-y-4 max-w-sm mx-auto mt-20">
-      <h2 className="text-2xl font-bold text-gray-800 text-center">Complete Your Profile</h2>
-      <p className="text-gray-500 text-sm text-center">Please choose a display name so others know who you are.</p>
+    <div className="p-6 border-2 border-border rounded-3xl bg-background shadow-xl space-y-4 max-w-sm mx-auto mt-20">
+      <h2 className="text-2xl font-bold text-foreground text-center">Complete Your Profile</h2>
+      <p className="text-muted-foreground text-sm text-center">Please choose a display name so others know who you are.</p>
 
       {error && <p className="text-red-500 text-xs text-center">{error}</p>}
 
@@ -66,7 +66,7 @@ export default function ProfileSetup({ onComplete }: { onComplete: () => void })
         <input
           type="text"
           placeholder="Display Name (e.g. Bobby)"
-          className="border-2 border-gray-200 p-3 w-full rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+          className="border-2 border-border p-3 w-full rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
           value={displayName}
           onChange={(e) => setDisplayName(e.target.value)}
           required
@@ -74,7 +74,7 @@ export default function ProfileSetup({ onComplete }: { onComplete: () => void })
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-lg transform active:scale-95 transition-all disabled:opacity-50"
+          className="w-full bg-primary hover:opacity-90 text-primary-foreground font-bold py-3 rounded-xl shadow-lg transform active:scale-95 transition-all disabled:opacity-50"
         >
           {loading ? 'Saving...' : 'Finish Setup'}
         </button>

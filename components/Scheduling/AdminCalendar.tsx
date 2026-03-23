@@ -39,7 +39,7 @@ export default function AdminCalendar({ pollId, onComplete }: { pollId: string, 
 
   return (
     <div className="flex flex-col items-center space-y-6">
-      <div className="p-4 bg-gray-50 rounded-3xl border border-gray-100 shadow-inner">
+      <div className="p-4 bg-secondary rounded-3xl border border-border shadow-inner">
         <DayPicker
           mode="multiple"
           selected={selectedDays}
@@ -48,13 +48,13 @@ export default function AdminCalendar({ pollId, onComplete }: { pollId: string, 
         />
       </div>
       <div className="text-center space-y-4 w-full">
-        <p className="text-sm text-gray-500 font-medium">
+        <p className="text-sm text-muted-foreground font-medium">
             {selectedDays.length} dates selected
         </p>
         <button
           onClick={handlePropose}
           disabled={loading || selectedDays.length === 0}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl shadow-lg transform active:scale-95 transition-all disabled:opacity-50"
+          className="w-full bg-primary hover:opacity-90 text-primary-foreground font-bold py-4 rounded-2xl shadow-lg transform active:scale-95 transition-all disabled:opacity-50"
         >
           {loading ? 'Submitting...' : 'Propose These Dates'}
         </button>

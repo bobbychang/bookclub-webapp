@@ -88,7 +88,7 @@ export default function AuthContainer({ children }: { children: (profile: any) =
     <>
       <div className="max-w-2xl mx-auto px-6 pt-4 flex justify-between items-center text-sm font-medium">
         <div className="flex items-center gap-2">
-            <span className="text-gray-600">Signed in as <span className="text-blue-600 font-bold">{profile.displayName}</span></span>
+            <span className="text-muted-foreground">Signed in as <span className="text-blue-600 font-bold">{profile.displayName}</span></span>
             {session.user.isDev && <span className="bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded text-[10px] font-bold uppercase">Dev Mode</span>}
         </div>
         <button 

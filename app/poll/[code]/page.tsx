@@ -69,13 +69,13 @@ function PollView({ code, profile }: { code: string, profile: any }) {
     <div className="max-w-lg mx-auto mt-10 p-6 space-y-6 font-sans">
       <div className="flex justify-between items-center border-b pb-4">
         <div className="flex items-center gap-3">
-          <Link href="/" className="text-gray-400 hover:text-black transition-colors" title="Back to Home">
+          <Link href="/" className="text-muted-foreground hover:text-foreground transition-colors" title="Back to Home">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
           </Link>
           <h1 className="text-2xl font-bold">Poll: {poll.code}</h1>
         </div>
         {isAdmin && poll.status === 'nominating' && (
-          <button onClick={handleStartVoting} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-colors">
+          <button onClick={handleStartVoting} className="bg-primary hover:opacity-90 text-primary-foreground px-4 py-2 rounded-lg font-semibold text-sm transition-colors">
             Start Voting Phase
           </button>
         )}
@@ -84,7 +84,7 @@ function PollView({ code, profile }: { code: string, profile: any }) {
              <span className="text-sm font-bold text-blue-800 bg-blue-100 px-3 py-2 rounded-lg">
               Votes Cast: {totalVotesThisRound}
             </span>
-            <button onClick={handleEndRound} className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-colors">
+            <button onClick={handleEndRound} className="bg-red-500 hover:bg-red-600 text-primary-foreground px-4 py-2 rounded-lg font-semibold text-sm transition-colors">
               End Round {currentRoundIndex + 1}
             </button>
           </div>
@@ -98,16 +98,16 @@ function PollView({ code, profile }: { code: string, profile: any }) {
         </div>
       ) : poll.status === 'nominating' ? (
         <div className="space-y-6">
-          <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-4">
-            <h2 className="text-xl font-bold text-gray-800">Nominate a Book</h2>
-            <p className="text-sm text-gray-500">Pick from existing community recommendations, or enter a new title to automatically add it via OpenLibrary.</p>
+          <div className="bg-background p-6 rounded-xl border border-border shadow-sm space-y-4">
+            <h2 className="text-xl font-bold text-foreground">Nominate a Book</h2>
+            <p className="text-sm text-muted-foreground">Pick from existing community recommendations, or enter a new title to automatically add it via OpenLibrary.</p>
             
             <div className="space-y-3">
               <input 
                 value={nominationTitle}
                 onChange={e => setNominationTitle(e.target.value)}
                 placeholder="Type a book title..."
-                className="w-full border-2 border-gray-200 rounded-lg p-3 outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium"
+                className="w-full border-2 border-border rounded-lg p-3 outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium"
                 list="recommendations-list"
               />
               <datalist id="recommendations-list">
@@ -116,10 +116,10 @@ function PollView({ code, profile }: { code: string, profile: any }) {
                 ))}
               </datalist>
               <div className="flex gap-3">
-                <button onClick={() => handleNominate(nominationTitle)} disabled={!nominationTitle.trim()} className="flex-1 bg-black text-white font-bold py-3 rounded-lg hover:bg-gray-800 disabled:opacity-50 transition-all">
+                <button onClick={() => handleNominate(nominationTitle)} disabled={!nominationTitle.trim()} className="flex-1 bg-primary text-primary-foreground font-bold py-3 rounded-lg hover:opacity-90 disabled:opacity-50 transition-all">
                   Submit Nomination
                 </button>
-                <button onClick={() => handleNominate('SKIP')} className="flex-1 bg-gray-200 text-gray-800 font-bold py-3 rounded-lg hover:bg-gray-300 transition-all">
+                <button onClick={() => handleNominate('SKIP')} className="flex-1 bg-muted text-foreground font-bold py-3 rounded-lg hover:bg-gray-300 transition-all">
                   Skip
                 </button>
               </div>
@@ -131,29 +131,29 @@ function PollView({ code, profile }: { code: string, profile: any }) {
             )}
           </div>
           
-          <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
-            <h3 className="font-bold text-gray-800 mb-4 border-b pb-2">Group Nominations</h3>
+          <div className="bg-secondary p-6 rounded-xl border border-border">
+            <h3 className="font-bold text-foreground mb-4 border-b pb-2">Group Nominations</h3>
             <ul className="space-y-3">
               {Object.entries(poll.nominations || {}).map(([voterName, nom]: [string, any]) => (
                  <li key={voterName} className="flex justify-between items-center text-sm">
-                   <span className="font-medium text-gray-700">{voterName}</span>
-                   <span className="bg-white px-3 py-1 rounded border shadow-sm font-semibold">{nom.title || 'Skipped'}</span>
+                   <span className="font-medium text-foreground">{voterName}</span>
+                   <span className="bg-background px-3 py-1 rounded border shadow-sm font-semibold">{nom.title || 'Skipped'}</span>
                  </li>
               ))}
             </ul>
-            {Object.keys(poll.nominations || {}).length === 0 && <p className="text-sm text-gray-500 italic">No one has nominated yet.</p>}
+            {Object.keys(poll.nominations || {}).length === 0 && <p className="text-sm text-muted-foreground italic">No one has nominated yet.</p>}
           </div>
         </div>
       ) : (
         <div className="space-y-4">
-          <h3 className="font-semibold text-lg mt-4 text-gray-800">Casting vote as <span className="text-blue-600">{profile.displayName}</span></h3>
+          <h3 className="font-semibold text-lg mt-4 text-foreground">Casting vote as <span className="text-blue-600">{profile.displayName}</span></h3>
           <div className="space-y-2">
             {poll.options.map((opt: string) => (
               <button 
                 key={opt}
                 onClick={() => handleVote(opt)}
                 className={`w-full p-4 border-2 rounded-xl text-left font-medium transition-all ${
-                  currentVotes[profile.displayName] === opt ? 'bg-blue-600 text-white border-blue-600 shadow-md transform scale-[1.02]' : 'hover:bg-gray-50 hover:border-blue-300'
+                  currentVotes[profile.displayName] === opt ? 'bg-primary text-primary-foreground border-blue-600 shadow-md transform scale-[1.02]' : 'hover:bg-secondary hover:border-blue-300'
                 }`}
               >
                 {opt}
@@ -165,21 +165,21 @@ function PollView({ code, profile }: { code: string, profile: any }) {
 
       {poll.status === 'voting' && (
         <div className="mt-12 space-y-6">
-          <h3 className="text-xl font-bold text-gray-800 border-b pb-2">Previous Rounds</h3>
+          <h3 className="text-xl font-bold text-foreground border-b pb-2">Previous Rounds</h3>
           {poll.rounds.map((round: any, idx: number) => {
             if (idx === currentRoundIndex && poll.status === 'voting') return null; 
             return (
-              <div key={idx} className="bg-gray-50 p-4 rounded-xl border-2 border-gray-100 shadow-sm">
-                <h4 className="font-bold text-gray-800 mb-3 flex items-center gap-2">
-                  <span className="bg-gray-200 text-gray-700 w-6 h-6 rounded-full flex items-center justify-center text-xs">{idx + 1}</span> 
+              <div key={idx} className="bg-secondary p-4 rounded-xl border-2 border-border shadow-sm">
+                <h4 className="font-bold text-foreground mb-3 flex items-center gap-2">
+                  <span className="bg-muted text-foreground w-6 h-6 rounded-full flex items-center justify-center text-xs">{idx + 1}</span> 
                   Round {idx + 1}
                 </h4>
-                {Object.entries(round.votes).length === 0 ? <p className="text-sm text-gray-500 italic">No votes recorded.</p> : null}
+                {Object.entries(round.votes).length === 0 ? <p className="text-sm text-muted-foreground italic">No votes recorded.</p> : null}
                 <ul className="space-y-2 text-sm">
                   {Object.entries(round.votes).map(([voter, choice]) => (
-                    <li key={voter} className="flex justify-between border-b border-gray-200 pb-2">
-                      <span className="text-gray-700 font-medium">{voter}</span>
-                      <span className="font-bold text-gray-900">{String(choice)}</span>
+                    <li key={voter} className="flex justify-between border-b border-border pb-2">
+                      <span className="text-foreground font-medium">{voter}</span>
+                      <span className="font-bold text-foreground">{String(choice)}</span>
                     </li>
                   ))}
                 </ul>
@@ -194,7 +194,7 @@ function PollView({ code, profile }: { code: string, profile: any }) {
               </h4>
               <div className="flex gap-2 flex-wrap">
                 {poll.eliminated.map((opt: string) => (
-                  <span key={opt} className="bg-white border border-red-200 text-red-700 px-3 py-1.5 rounded-lg text-sm font-medium shadow-sm line-through decoration-red-400">
+                  <span key={opt} className="bg-background border border-red-200 text-red-700 px-3 py-1.5 rounded-lg text-sm font-medium shadow-sm line-through decoration-red-400">
                     {opt}
                   </span>
                 ))}

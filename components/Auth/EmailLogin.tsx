@@ -58,8 +58,8 @@ export default function EmailLogin({ onLoginSuccess }: { onLoginSuccess: () => v
   };
 
   return (
-    <div className="p-6 border-2 border-gray-100 rounded-3xl bg-white shadow-xl space-y-4 max-w-sm mx-auto mt-20">
-      <h2 className="text-2xl font-bold text-gray-800 text-center">Welcome!</h2>
+    <div className="p-6 border-2 border-border rounded-3xl bg-background shadow-xl space-y-4 max-w-sm mx-auto mt-20">
+      <h2 className="text-2xl font-bold text-foreground text-center">Welcome!</h2>
       
       {isDevMode && (
         <div className="bg-yellow-50 border border-yellow-200 p-3 rounded-xl text-center space-y-2">
@@ -67,13 +67,13 @@ export default function EmailLogin({ onLoginSuccess }: { onLoginSuccess: () => v
             <div className="flex flex-wrap gap-2 justify-center">
                 <button 
                     onClick={() => handleDevLogin('rchang915@gmail.com', 'dev-admin-id')}
-                    className="text-[10px] bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-1 px-3 rounded-lg transition-colors"
+                    className="text-[10px] bg-yellow-500 hover:bg-yellow-600 text-primary-foreground font-bold py-1 px-3 rounded-lg transition-colors"
                 >
                     Login as Admin
                 </button>
                 <button 
                     onClick={() => handleDevLogin('user-a@example.com', 'dev-user-id-1')}
-                    className="text-[10px] bg-blue-500 hover:bg-blue-600 text-white font-bold py-1 px-3 rounded-lg transition-colors"
+                    className="text-[10px] bg-primary hover:bg-primary text-primary-foreground font-bold py-1 px-3 rounded-lg transition-colors"
                 >
                     Login as User A
                 </button>
@@ -81,7 +81,7 @@ export default function EmailLogin({ onLoginSuccess }: { onLoginSuccess: () => v
         </div>
       )}
 
-      <p className="text-gray-500 text-sm text-center">
+      <p className="text-muted-foreground text-sm text-center">
         Enter your email to receive a magic link.
       </p>
 
@@ -92,7 +92,7 @@ export default function EmailLogin({ onLoginSuccess }: { onLoginSuccess: () => v
         <input
           type="email"
           placeholder="Email Address"
-          className="border-2 border-gray-200 p-3 w-full rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+          className="border-2 border-border p-3 w-full rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
@@ -100,7 +100,7 @@ export default function EmailLogin({ onLoginSuccess }: { onLoginSuccess: () => v
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-lg transform active:scale-95 transition-all disabled:opacity-50"
+          className="w-full bg-primary hover:opacity-90 text-primary-foreground font-bold py-3 rounded-xl shadow-lg transform active:scale-95 transition-all disabled:opacity-50"
         >
           {loading ? 'Sending...' : 'Send Magic Link'}
         </button>

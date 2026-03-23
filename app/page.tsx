@@ -41,13 +41,13 @@ export default function Home() {
       {(profile) => (
         <div className="max-w-2xl mx-auto mt-10 p-6 space-y-12 font-sans pb-20">
           <div className="text-center space-y-4">
-            <h1 className="text-4xl font-extrabold tracking-tight text-gray-900">{BOOKCLUB_NAME}</h1>
+            <h1 className="text-4xl font-extrabold tracking-tight text-foreground">{BOOKCLUB_NAME}</h1>
             {settings ? (
-              <p className="text-xl text-gray-600 font-medium animate-fade-in">
+              <p className="text-xl text-muted-foreground font-medium animate-fade-in">
                 The next book is <span className="text-blue-600 font-bold">{settings.currentBookTitle}</span> by {settings.currentBookAuthor}
               </p>
             ) : (
-              <p className="text-xl text-gray-600 font-medium animate-pulse">Loading current book...</p>
+              <p className="text-xl text-muted-foreground font-medium animate-pulse">Loading current book...</p>
             )}
           </div>
 
@@ -66,23 +66,23 @@ export default function Home() {
             <DateSelection profile={profile} />
           </div>
 
-          <div className="mt-12 p-8 border-2 border-gray-100 rounded-3xl bg-white shadow-xl flex flex-col items-center justify-center text-center space-y-4">
-            <h2 className="text-2xl font-bold text-gray-800">Book Selection</h2>
+          <div className="mt-12 p-8 border-2 border-border rounded-3xl bg-background shadow-xl flex flex-col items-center justify-center text-center space-y-4">
+            <h2 className="text-2xl font-bold text-foreground">Book Selection</h2>
             {activePollCode ? (
               <>
-                <p className="text-gray-500">There is currently an active book selection process underway!</p>
+                <p className="text-muted-foreground">There is currently an active book selection process underway!</p>
                 <button 
                   onClick={() => router.push(`/poll/${activePollCode}`)} 
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl shadow-lg transform active:scale-95 transition-all"
+                  className="bg-primary hover:opacity-90 text-primary-foreground font-bold py-3 px-8 rounded-xl shadow-lg transform active:scale-95 transition-all"
                 >
                   Go to Active Poll
                 </button>
               </>
             ) : (
               <>
-                <p className="text-gray-500">No active book selection is currently running.</p>
+                <p className="text-muted-foreground">No active book selection is currently running.</p>
                 {profile.isAdmin && (
-                  <button onClick={handleCreate} className="mt-4 bg-black hover:bg-gray-800 text-white px-8 py-3 rounded-xl font-bold shadow-lg transform active:scale-95 transition-all">
+                  <button onClick={handleCreate} className="mt-4 bg-primary hover:opacity-90 text-primary-foreground px-8 py-3 rounded-xl font-bold shadow-lg transform active:scale-95 transition-all">
                     Start Next Book Selection
                   </button>
                 )}
