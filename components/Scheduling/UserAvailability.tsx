@@ -23,10 +23,10 @@ export default function UserAvailability({
     const now = new Date().toISOString();
     
     // Check if availability already exists to decide whether to provide an ID
-    const existing = poll.dates.find((d: any) => d.id === dateId)?.responses.find((r: any) => r.userId === profile.id);
+    const existing = poll.dates.find((d: any) => d.id === dateId)?.responses.find((r: any) => r.userId === profile?.id);
 
     const payload: any = {
-        userId: profile.id,
+        userId: profile?.id,
         dateId: dateId,
         status: status,
         updatedAt: now,
@@ -50,14 +50,19 @@ export default function UserAvailability({
 
   const handleFinalize = async (dateId: string, dateStr: string) => {
     if (!confirm(`Finalize the meeting for ${format(new Date(dateStr), 'PPP')}?`)) return;
-    const now = new Date().toISOString();
     
-    await supabase.from('SchedulingPoll').update({ 
-        status: 'FINALIZED',
-        finalDate: dateStr,
-        updatedAt: now
-    } as never).eq('id', poll.id);
-    onUpdate();
+    const response = await fetch('/bookclub/api/admin/scheduling/finalize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pollId: poll.id, finalDate: dateStr }),
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        alert(errorData.error || 'Failed to finalize poll');
+    } else {
+        onUpdate();
+    }
   };
 
   return (
@@ -104,7 +109,7 @@ export default function UserAvailability({
                         {profile?.isAdmin && poll.status === 'VOTING' && (
                             <button
                                 onClick={() => handleFinalize(d.id, d.date)}
-                                className="ml-4 text-[10px] font-bold uppercase tracking-wider bg-primary text-primary-foreground px-3 py-2 rounded-lg hover:opacity-90"
+                                className="ml-4 text-[10px] font-bold uppercase tracking-wider bg-primary text-primary-foreground px-3 py-2 rounded-xl hover:opacity-90"
                             >
                                 Finalize
                             </button>

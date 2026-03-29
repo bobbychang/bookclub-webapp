@@ -30,7 +30,7 @@ export default function DateSelection({ profile }: { profile: any }) {
       .maybeSingle();
 
     if (error && error.code !== 'PGRST116') {
-        console.error('Error fetching poll:', error);
+        console.error('Error fetching poll:', JSON.stringify(error, null, 2));
     }
 
     setPoll(activePoll);
@@ -58,14 +58,14 @@ export default function DateSelection({ profile }: { profile: any }) {
         status: 'PROPOSING',
         createdAt: now,
         updatedAt: now
-    }).select().single();
+    } as any).select().single();
 
     if (error) {
         alert('Failed to start proposing: ' + error.message);
         setLoading(false);
     } else {
         // Explicitly include empty dates array to prevent crashes
-        setPoll({ ...data, dates: [] });
+        setPoll({ ...(data as any), dates: [] });
         setLoading(false);
     }
   };
@@ -79,7 +79,7 @@ export default function DateSelection({ profile }: { profile: any }) {
             <Calendar className="text-blue-600" /> Date Selection
         </h2>
         <p className="text-muted-foreground italic">The host is choosing dates for the next book club.</p>
-        {profile.isAdmin && (
+        {profile?.isAdmin && (
           <button 
             onClick={handleStartProposing}
             className="bg-primary hover:opacity-90 text-primary-foreground px-8 py-3 rounded-2xl font-bold text-sm shadow-lg transition-all flex items-center gap-2 mx-auto"
@@ -117,7 +117,7 @@ export default function DateSelection({ profile }: { profile: any }) {
             ))}
           </div>
 
-          {profile.isAdmin && (
+          {profile?.isAdmin && (
             <div className="pt-6 border-t border-green-100/50 mt-4">
                 <button 
                     onClick={handleStartProposing}
@@ -141,7 +141,7 @@ export default function DateSelection({ profile }: { profile: any }) {
             {poll.status === 'PROPOSING' ? 'Choose Potential Dates' : 'Mark Your Availability'}
         </h2>
         
-        {poll.status === 'PROPOSING' && profile.isAdmin ? (
+        {poll.status === 'PROPOSING' && profile?.isAdmin ? (
             <AdminCalendar pollId={poll.id} onComplete={fetchPoll} />
         ) : (
             <UserAvailability poll={poll} profile={profile} onUpdate={fetchPoll} />
