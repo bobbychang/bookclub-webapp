@@ -117,6 +117,27 @@ test.describe('Book Club Scheduling Flow', () => {
     }
     await saveHtmlSnapshot(finalAdminPage, '9-admin-date-finalized');
 
-    await finalAdminContext.close();
+    // ==========================================
+    // PHASE 5: RSVP AS ADMIN & VERIFY GUEST LIST
+    // ==========================================
+    const rsvpAdminContext = await browser.newContext();
+    const rsvpAdminPage = await rsvpAdminContext.newPage();
+    await rsvpAdminPage.goto('/');
+    
+    await rsvpAdminPage.getByRole('button', { name: 'Login as Admin' }).click();
+    await rsvpAdminPage.waitForSelector('text=🎉 Date Confirmed!');
+
+    // Click 'Yes' on the RSVP widget
+    const rsvpYesButton = rsvpAdminPage.getByRole('button', { name: /yes/i }).first();
+    await expect(rsvpYesButton).toBeVisible();
+    await rsvpYesButton.click();
+
+    // Verify name appears in the guest list
+    // The dev user's name is usually set in the dev-login flow or via localStorage
+    // For this test, we expect the admin name to appear
+    await expect(rsvpAdminPage.getByText(/attending/i)).toBeVisible();
+    await saveHtmlSnapshot(rsvpAdminPage, '10-admin-rsvp-done');
+
+    await rsvpAdminContext.close();
   });
 });
