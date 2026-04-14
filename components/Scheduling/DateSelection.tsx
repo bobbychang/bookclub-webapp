@@ -6,6 +6,7 @@ import { format } from 'date-fns';
 import AdminCalendar from './AdminCalendar';
 import UserAvailability from './UserAvailability';
 import AvailabilityGrid from './AvailabilityGrid';
+import RSVPWidget from './RSVPWidget';
 
 export default function DateSelection({ profile }: { profile: any }) {
   const [poll, setPoll] = useState<any>(null);
@@ -103,19 +104,12 @@ export default function DateSelection({ profile }: { profile: any }) {
             <p className="text-muted-foreground font-medium uppercase text-xs tracking-widest mb-1">The next book club is</p>
             <p className="text-2xl font-extrabold text-green-700">{format(new Date(poll.finalDate), 'EEEE, MMMM do')}</p>
           </div>
-          <p className="text-sm text-muted-foreground font-medium italic pt-2">
-            Availability for this date:
-          </p>
-          <div className="flex flex-wrap justify-center gap-2">
-            {poll.dates?.find((d: any) => d.date === poll.finalDate)?.responses.map((r: any) => (
-                <span key={r.id} className={`text-[10px] font-bold px-3 py-1 rounded-full uppercase ${
-                    r.status === 'YES' ? 'bg-green-100 text-green-700' : 
-                    r.status === 'MAYBE' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'
-                }`}>
-                    {r.user.displayName}
-                </span>
-            ))}
-          </div>
+          <RSVPWidget 
+            finalDateId={poll.dates?.find((d: any) => format(new Date(d.date), 'yyyy-MM-dd') === format(new Date(poll.finalDate), 'yyyy-MM-dd'))?.id}
+            responses={poll.dates?.find((d: any) => format(new Date(d.date), 'yyyy-MM-dd') === format(new Date(poll.finalDate), 'yyyy-MM-dd'))?.responses || []}
+            profile={profile}
+            onUpdate={fetchPoll}
+          />
 
           {profile?.isAdmin && (
             <div className="pt-6 border-t border-green-100/50 mt-4">

@@ -45,6 +45,7 @@ export default defineConfig({
   ],
 
   /* Run your local dev server before starting the tests */
+  /*
   webServer: {
     command: 'npm run dev',
     url: 'http://localhost:3000',
@@ -53,4 +54,5 @@ export default defineConfig({
       NEXT_PUBLIC_DEV_MODE: 'true', // Enforce dev mode so we don't hit Supabase Email caps during testing!
     }
   },
+  */
 });

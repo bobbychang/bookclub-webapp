@@ -21,6 +21,10 @@ export default function RSVPWidget({
 
   const handleRSVP = async (status: Status) => {
     if (!profile?.id) return;
+    if (!finalDateId) {
+        alert("Error: Missing finalized date ID. Cannot complete RSVP.");
+        return;
+    }
     setLoading(true);
     const now = new Date().toISOString();
     
