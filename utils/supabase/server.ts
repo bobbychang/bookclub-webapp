@@ -26,3 +26,20 @@ export const createClient = (cookieStore: Awaited<ReturnType<typeof cookies>>) =
     },
   );
 };
+
+export const createAdminClient = () => {
+    return createServerClient(
+        supabaseUrl!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        {
+            cookies: {
+                getAll() {
+                    return [];
+                },
+                setAll() {
+                    // Service role client doesn't need to persist cookies
+                },
+            },
+        }
+    );
+};

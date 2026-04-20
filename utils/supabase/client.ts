@@ -1,20 +1,34 @@
-import { createClient as createSupabaseClient } from '@supabase/supabase-js';
+import { createBrowserClient } from '@supabase/ssr';
+import { type SupabaseClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-let client: ReturnType<typeof createSupabaseClient> | null = null;
+let client: SupabaseClient | undefined;
 
 export const createClient = () => {
-  if (!client) {
-    client = createSupabaseClient(supabaseUrl!, supabaseKey!, {
-      auth: {
-        flowType: 'implicit',
-        autoRefreshToken: true,
-        persistSession: true,
-        detectSessionInUrl: true
+  // Return a fresh client for SSR to avoid state leaks between requests
+  if (typeof window === 'undefined') {
+    return createBrowserClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookieOptions: {
+          path: '/bookclub',
+        }
       }
-    });
+    );
   }
+
+  // Use singleton for browser to share session state
+  if (client) return client;
+
+  client = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookieOptions: {
+        path: '/bookclub',
+      }
+    }
+  );
+  
   return client;
 };

@@ -14,24 +14,20 @@ export default function AdminCalendar({ pollId, onComplete }: { pollId: string, 
     if (selectedDays.length === 0) return alert('Please select at least one date.');
     setLoading(true);
 
-    const now = new Date().toISOString();
-    const datesToInsert = selectedDays.map(d => ({
-        id: crypto.randomUUID(),
-        pollId: pollId,
+    const datesToPropose = selectedDays.map(d => ({
         date: d.toISOString(),
-        createdAt: now,
-        updatedAt: now
     }));
 
-    const { error: insertError } = await supabase.from('ProposedDate').insert(datesToInsert);
-    
-    if (insertError) {
-        alert(insertError.message);
+    const response = await fetch('/bookclub/api/admin/scheduling/propose', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pollId, dates: datesToPropose }),
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        alert(errorData.error || 'Failed to propose dates');
     } else {
-        await supabase.from('SchedulingPoll').update({ 
-            status: 'VOTING',
-            updatedAt: now
-        }).eq('id', pollId);
         onComplete();
     }
     setLoading(false);

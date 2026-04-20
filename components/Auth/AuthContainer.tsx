@@ -21,24 +21,6 @@ export default function AuthContainer({ children }: { children: (auth: AuthConte
 
   const checkUser = async () => {
     setLoading(true);
-    
-    if (isDevMode) {
-        const devSessionStr = localStorage.getItem('dev-session');
-        if (devSessionStr) {
-            const devUser = JSON.parse(devSessionStr);
-            setSession({ user: devUser });
-            
-            const { data: profile } = await supabase
-                .from('Profile')
-                .select('*')
-                .eq('id', devUser.id)
-                .single();
-            
-            setProfile(profile);
-            setLoading(false);
-            return;
-        }
-    }
 
     const { data: { session } } = await supabase.auth.getSession();
     setSession(session);
@@ -58,27 +40,19 @@ export default function AuthContainer({ children }: { children: (auth: AuthConte
   useEffect(() => {
     checkUser();
 
-    if (!isDevMode) {
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-            setSession(session);
-            if (!session) {
-                setProfile(null);
-            } else {
-                checkUser();
-            }
-        });
-        return () => subscription.unsubscribe();
-    }
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+        setSession(session);
+        if (!session) {
+            setProfile(null);
+        } else {
+            checkUser();
+        }
+    });
+    return () => subscription.unsubscribe();
   }, []);
 
   const handleSignOut = async () => {
-    if (isDevMode) {
-        localStorage.removeItem('dev-session');
-        setSession(null);
-        setProfile(null);
-    } else {
-        await supabase.auth.signOut();
-    }
+    await supabase.auth.signOut();
   };
 
   return <>{children({ session, profile, loading, checkUser, handleSignOut })}</>;

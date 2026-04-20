@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/utils/supabase/client';
-import { Calendar, Check, X, Minus, Loader2 } from 'lucide-react';
+import { Calendar, Check, X, Minus, Loader2, MapPin } from 'lucide-react';
 import { format } from 'date-fns';
 import AdminCalendar from './AdminCalendar';
 import UserAvailability from './UserAvailability';
@@ -11,6 +11,9 @@ import RSVPWidget from './RSVPWidget';
 export default function DateSelection({ profile }: { profile: any }) {
   const [poll, setPoll] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [editingLocation, setEditingLocation] = useState(false);
+  const [locationInput, setLocationInput] = useState('');
+  const [savingLocation, setSavingLocation] = useState(false);
   const supabase = createClient();
 
   const fetchPoll = useCallback(async () => {
@@ -35,6 +38,7 @@ export default function DateSelection({ profile }: { profile: any }) {
     }
 
     setPoll(activePoll);
+    if (activePoll) setLocationInput(activePoll.location || '');
     setLoading(false);
   }, [supabase]);
 
@@ -67,8 +71,26 @@ export default function DateSelection({ profile }: { profile: any }) {
     } else {
         // Explicitly include empty dates array to prevent crashes
         setPoll({ ...(data as any), dates: [] });
+        setLocationInput('');
         setLoading(false);
     }
+  };
+
+  const handleSaveLocation = async () => {
+    setSavingLocation(true);
+    const res = await fetch('/bookclub/api/admin/scheduling/location', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pollId: poll.id, location: locationInput })
+    });
+    if (res.ok) {
+        setEditingLocation(false);
+        fetchPoll();
+    } else {
+        const err = await res.json();
+        alert("Failed to save location: " + err.error);
+    }
+    setSavingLocation(false);
   };
 
   if (loading && !poll) return <div className="flex justify-center p-8"><Loader2 className="animate-spin text-blue-600" /></div>;
@@ -102,7 +124,49 @@ export default function DateSelection({ profile }: { profile: any }) {
           </h2>
           <div className="bg-background p-6 rounded-2xl shadow-sm border border-green-50">
             <p className="text-muted-foreground font-medium uppercase text-xs tracking-widest mb-1">The next book club is</p>
-            <p className="text-2xl font-extrabold text-green-700">{format(new Date(poll.finalDate), 'EEEE, MMMM do')}</p>
+            <p className="text-2xl font-extrabold text-green-700 mb-4">{format(new Date(poll.finalDate), 'EEEE, MMMM do')}</p>
+            
+            <div className="pt-4 border-t border-green-100 flex flex-col items-center gap-2">
+                <div className="flex items-center gap-2 text-foreground font-bold">
+                    <MapPin className="text-red-500 w-5 h-5" />
+                    <span>Location: {poll.location || <span className="text-muted-foreground italic font-normal">TBD (Host to decide)</span>}</span>
+                </div>
+                
+                {profile?.isAdmin && !editingLocation && (
+                    <button onClick={() => setEditingLocation(true)} className="text-[10px] text-blue-600 hover:underline uppercase tracking-wider font-bold mt-1">
+                        Edit Location
+                    </button>
+                )}
+                
+                {profile?.isAdmin && editingLocation && (
+                    <div className="flex items-center gap-2 mt-2 w-full max-w-xs">
+                        <input 
+                            type="text" 
+                            className="flex-1 border border-border p-2 rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary"
+                            placeholder="Enter location..."
+                            value={locationInput}
+                            onChange={(e) => setLocationInput(e.target.value)}
+                            autoFocus
+                        />
+                        <button 
+                            onClick={handleSaveLocation}
+                            disabled={savingLocation}
+                            className="bg-primary text-primary-foreground px-3 py-2 rounded-lg text-xs font-bold hover:opacity-90 disabled:opacity-50 flex items-center gap-1"
+                        >
+                            {savingLocation ? <Loader2 className="animate-spin w-3 h-3" /> : 'Save'}
+                        </button>
+                        <button 
+                            onClick={() => {
+                                setEditingLocation(false);
+                                setLocationInput(poll.location || '');
+                            }}
+                            className="text-muted-foreground hover:text-foreground p-2"
+                        >
+                            <X className="w-4 h-4" />
+                        </button>
+                    </div>
+                )}
+            </div>
           </div>
           <RSVPWidget 
             finalDateId={poll.dates?.find((d: any) => format(new Date(d.date), 'yyyy-MM-dd') === format(new Date(poll.finalDate), 'yyyy-MM-dd'))?.id}

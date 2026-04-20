@@ -32,11 +32,7 @@ export default function ProfileWidget({ auth }: { auth: AuthContextType }) {
     setLoading(true);
     setSuccessMsg('');
 
-    let userId = session?.user?.id;
-    if (isDevMode && !userId) {
-        const stored = localStorage.getItem('dev-session');
-        if (stored) userId = JSON.parse(stored).id;
-    }
+    const userId = session?.user?.id;
 
     if (!userId) {
         setLoading(false);
@@ -51,7 +47,7 @@ export default function ProfileWidget({ auth }: { auth: AuthContextType }) {
       .from('Profile')
       .upsert({
         id: userId,
-        email: session?.user?.email || 'dev@example.com',
+        email: session?.user?.email,
         displayName: displayName,
         isAdmin: isAdmin,
         updatedAt: now,
@@ -69,10 +65,6 @@ export default function ProfileWidget({ auth }: { auth: AuthContextType }) {
     <div className="p-6 border-2 border-border rounded-3xl bg-background shadow-xl space-y-4 max-w-sm w-full mx-auto relative pt-8">
       <div className="absolute top-4 right-4">
          <button onClick={handleSignOut} className="text-[10px] uppercase text-red-500 hover:text-red-700 font-bold px-2 py-1 bg-red-50 rounded-md transition-colors border border-red-100">Sign Out</button>
-      </div>
-
-      <div className="absolute top-4 left-4">
-          {session?.user?.isDev && <span className="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-[10px] font-bold uppercase border border-yellow-200">Dev</span>}
       </div>
 
       <h2 className="text-xl font-bold text-foreground text-center">
