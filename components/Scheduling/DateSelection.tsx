@@ -21,11 +21,11 @@ export default function DateSelection({ profile }: { profile: any }) {
       .from('bookclub_scheduling_polls')
       .select(`
         *,
-        dates:ProposedDate(
+        dates:bookclub_proposed_dates(
           *,
-          responses:Availability(
+          responses:bookclub_availabilities(
             *,
-            user:Profile(displayName)
+            user:shared_profiles(displayName)
           )
         )
       `)
