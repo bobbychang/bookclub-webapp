@@ -26,8 +26,9 @@ The project has been transformed from a simple voting app into a full Book Club 
 5. **Recommendations**: Community book feed using OpenLibrary API for metadata retrieval.
 6. **Theming**: Premium "Slate & Blue" system with full Light/Dark mode support using Tailwind v4 semantic tokens.
 7. **Environment Sync**: 
-   - **Staging Project**: `bookclub-staging` (`siybezdcbtaqrauiqeop`) established for safe feature testing.
-   - **GitHub Actions**: Automated schema synchronization between local, staging, and production.
+   - **Shared Monolith Database**: The production Supabase database now serves as a backend for multiple personal projects. All tables are strictly prefixed (e.g. `bookclub_` and `shared_`).
+   - **Staging Deprecated**: The dedicated staging database has been deprecated. The staging web app tests new features directly against the production database. Test data should be cleaned up manually.
+   - **GitHub Actions**: Automated schema synchronization between local and production.
 8. **DevOps**:
    - **Custom Domain**: `bobbychang.co/bookclub` linked via GoDaddy.
    - Git repository initialized and linked to `https://github.com/bobbychang/bookclub-webapp.git`.
@@ -35,8 +36,8 @@ The project has been transformed from a simple voting app into a full Book Club 
    - 2GB Swap file added to EC2 to support Next.js builds on low-memory instances.
 
 ## 🛠️ Technical Details & "Gotchas"
-- **Database Connection**: Use Port **6543** (Pooler) with `?sslmode=require` for Prisma. **DIRECT_URL** on port **5432** is required for `prisma db push`.
-- **Staging**: Access staging credentials in `.env.staging`. Use `npx prisma db push` with staging URLs to sync schema.
+- **Database Connection**: Use Port **6543** (Pooler) with `?sslmode=require` for Prisma. **DIRECT_URL** on port **5432** is required for `prisma db push`. All projects share this database using table prefixes (`bookclub_`).
+- **Testing on Prod**: Because staging points to prod, dev login is enabled on the prod DB. Be careful with destructive schema migrations.
 - **Security**: **Row Level Security (RLS) is ENABLED** on all tables. Policies enforce that users can only modify their own data, using `auth.uid()::text` for profile matching.
 - **IDs**: Database IDs (UUIDs) are currently generated in the frontend/client because default Postgres generation was inconsistent during the migration phase.
 - **Environment**: 

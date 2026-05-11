@@ -37,7 +37,7 @@ export default function ProfileSetup({ onComplete }: { onComplete: () => void })
     const now = new Date().toISOString();
 
     const { error: upsertError } = await supabase
-      .from('Profile')
+      .from('shared_profiles')
       .upsert({
         id: user.id,
         email: user.email!,

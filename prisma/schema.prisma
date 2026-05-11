@@ -17,6 +17,8 @@ model Profile {
   updatedAt       DateTime         @updatedAt
   availabilities  Availability[]
   recommendations Recommendation[]
+
+  @@map("shared_profiles")
 }
 
 model SchedulingPoll {
@@ -27,6 +29,8 @@ model SchedulingPoll {
   createdAt DateTime       @default(now())
   updatedAt DateTime       @updatedAt
   dates     ProposedDate[]
+
+  @@map("bookclub_scheduling_polls")
 }
 
 model ProposedDate {
@@ -37,6 +41,8 @@ model ProposedDate {
   updatedAt DateTime       @updatedAt
   responses Availability[]
   poll      SchedulingPoll @relation(fields: [pollId], references: [id])
+
+  @@map("bookclub_proposed_dates")
 }
 
 model Availability {
@@ -50,6 +56,7 @@ model Availability {
   user      Profile      @relation(fields: [userId], references: [id])
 
   @@unique([userId, dateId])
+  @@map("bookclub_availabilities")
 }
 
 model Recommendation {
@@ -60,6 +67,8 @@ model Recommendation {
   createdAt     DateTime @default(now())
   
   recommender   Profile  @relation(fields: [recommenderId], references: [id])
+
+  @@map("bookclub_recommendations")
 }
 
 model Settings {
@@ -67,4 +76,6 @@ model Settings {
   currentBookTitle    String   @default("The Phoenix Project")
   currentBookAuthor   String   @default("Gene Kim")
   currentBookCoverUrl String   @default("https://covers.openlibrary.org/b/id/9151976-L.jpg")
+
+  @@map("bookclub_settings")
 }

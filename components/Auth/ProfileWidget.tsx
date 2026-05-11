@@ -44,7 +44,7 @@ export default function ProfileWidget({ auth }: { auth: AuthContextType }) {
     const now = new Date().toISOString();
 
     const { error } = await supabase
-      .from('Profile')
+      .from('shared_profiles')
       .upsert({
         id: userId,
         email: session?.user?.email,

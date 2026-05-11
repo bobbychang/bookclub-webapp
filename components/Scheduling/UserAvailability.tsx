@@ -40,7 +40,7 @@ export default function UserAvailability({
     }
 
     const { error } = await supabase
-        .from('Availability')
+        .from('bookclub_availabilities')
         .upsert(payload, { onConflict: 'userId,dateId' });
 
     if (error) alert(error.message);

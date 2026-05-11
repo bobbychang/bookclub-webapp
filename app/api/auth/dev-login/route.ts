@@ -9,29 +9,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Dev Mode is disabled" }, { status: 403 });
   }
 
-  // 2. Strict Production Guard (Hard Block)
-  // We check for common production environment flags and hostnames
-  const isProduction = 
-    process.env.NODE_ENV === 'production' || 
-    process.env.VERCEL_ENV === 'production' ||
-    process.env.DEPLOYMENT_ENV === 'production' ||
-    process.env.IS_EC2 === 'true';
-
-  if (isProduction) {
-    console.warn(`Blocked Dev Login attempt in production environment for ${email}`);
-    return NextResponse.json({ error: "Forbidden: Dev Mode not allowed in production" }, { status: 403 });
-  }
-
-  // 3. Production Data Lock (Safety Guard)
-  // Ensure we are NOT pointing at the production database while using dev-login bypass.
-  // Prod Ref: bzgbskmghquhoxlbfcev
-  const isProdDatabase = process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('bzgbskmghquhoxlbfcev');
-  if (isProdDatabase) {
-    console.error(`CRITICAL: Dev Login attempted while pointing at PRODUCTION database (${email}). ACCESS BLOCKED.`);
-    return NextResponse.json({ 
-        error: "FORBIDDEN: You are currently connected to the PRODUCTION database. Instant Login is disabled to protect real user data. Please switch your .env to the Staging project." 
-    }, { status: 403 });
-  }
 
   try {
     const supabase = createAdminClient();

@@ -27,7 +27,7 @@ export default function AuthContainer({ children }: { children: (auth: AuthConte
 
     if (session?.user) {
       const { data: profile } = await supabase
-        .from('Profile')
+        .from('shared_profiles')
         .select('*')
         .eq('id', session.user.id)
         .single();

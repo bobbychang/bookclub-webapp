@@ -18,7 +18,7 @@ export default function DateSelection({ profile }: { profile: any }) {
 
   const fetchPoll = useCallback(async () => {
     const { data: activePoll, error } = await supabase
-      .from('SchedulingPoll')
+      .from('bookclub_scheduling_polls')
       .select(`
         *,
         dates:ProposedDate(
@@ -58,7 +58,7 @@ export default function DateSelection({ profile }: { profile: any }) {
   const handleStartProposing = async () => {
     setLoading(true);
     const now = new Date().toISOString();
-    const { data, error } = await supabase.from('SchedulingPoll').insert({ 
+    const { data, error } = await supabase.from('bookclub_scheduling_polls').insert({ 
         id: crypto.randomUUID(),
         status: 'PROPOSING',
         createdAt: now,
