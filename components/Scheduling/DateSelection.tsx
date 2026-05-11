@@ -47,9 +47,9 @@ export default function DateSelection({ profile }: { profile: any }) {
 
     const channel = supabase
       .channel('schema-db-changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'Availability' }, () => fetchPoll())
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'SchedulingPoll' }, () => fetchPoll())
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'ProposedDate' }, () => fetchPoll())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'bookclub_availabilities' }, () => fetchPoll())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'bookclub_scheduling_polls' }, () => fetchPoll())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'bookclub_proposed_dates' }, () => fetchPoll())
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
