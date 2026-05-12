@@ -17,9 +17,9 @@ npm install
 echo "💎 Generating Prisma client..."
 npx prisma generate
 
-# 4. Sync Database Schema to Production
-echo "🗄️ Syncing Database Schema..."
-npx prisma db push --skip-generate
+# 4. Sync Database Schema to Production (Disabled for Shared Monolith)
+echo "🗄️ Skipping Database Schema push to protect shared tables..."
+# npx prisma db push --skip-generate
 
 # 5. Build application
 echo "🏗️ Building application..."
