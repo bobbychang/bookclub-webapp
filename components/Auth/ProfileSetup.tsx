@@ -43,6 +43,7 @@ export default function ProfileSetup({ onComplete }: { onComplete: () => void })
         email: user.email!,
         displayName: displayName,
         isAdmin: isAdmin,
+        is_bookclub_member: true,
         updatedAt: now,
         createdAt: now,
       }, { onConflict: 'email' });

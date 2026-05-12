@@ -14,9 +14,10 @@ model Profile {
   displayName    String?
   isAdmin        Boolean        @default(false)
   createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
-  availabilities  Availability[]
-  recommendations Recommendation[]
+  updatedAt          DateTime         @updatedAt
+  is_bookclub_member Boolean          @default(false)
+  availabilities     Availability[]
+  recommendations    Recommendation[]
 
   @@map("shared_profiles")
 }

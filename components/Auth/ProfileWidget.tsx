@@ -50,6 +50,7 @@ export default function ProfileWidget({ auth }: { auth: AuthContextType }) {
         email: session?.user?.email,
         displayName: displayName,
         isAdmin: isAdmin,
+        is_bookclub_member: true,
         updatedAt: now,
       } as any, { onConflict: 'email' });
 

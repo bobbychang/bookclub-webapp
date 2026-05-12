@@ -33,6 +33,15 @@ export default function AuthContainer({ children }: { children: (auth: AuthConte
         .single();
       
       setProfile(profile);
+
+      // Gracefully grant bookclub access to shared profiles from other apps
+      if (profile && !profile.is_bookclub_member) {
+        await supabase
+          .from('shared_profiles')
+          .update({ is_bookclub_member: true })
+          .eq('id', session.user.id);
+        setProfile({ ...profile, is_bookclub_member: true });
+      }
     }
     setLoading(false);
   };
