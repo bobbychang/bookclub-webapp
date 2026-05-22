@@ -1,4 +1,5 @@
 import { createAdminClient } from "@/utils/supabase/server";
+import { appPath } from "@/lib/routes";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
@@ -18,7 +19,7 @@ export async function POST(request: Request) {
       type: 'magiclink',
       email: email,
       options: {
-        redirectTo: `${new URL(request.url).origin}/bookclub`
+        redirectTo: `${new URL(request.url).origin}${appPath('/')}`
       }
     });
 

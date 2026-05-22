@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { createClient } from '@/utils/supabase/client';
+import { apiPath, appPath } from '@/lib/routes';
 
 export default function EmailLogin({ onLoginSuccess }: { onLoginSuccess: () => void }) {
   const [email, setEmail] = useState('');
@@ -35,7 +36,7 @@ export default function EmailLogin({ onLoginSuccess }: { onLoginSuccess: () => v
     // --- DEV MODE BYPASS ---
     if (isDevMode) {
       try {
-        const response = await fetch('/bookclub/api/auth/dev-login', {
+        const response = await fetch(apiPath('/api/auth/dev-login'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email }),
@@ -81,7 +82,7 @@ export default function EmailLogin({ onLoginSuccess }: { onLoginSuccess: () => v
     const { error } = await supabase.auth.signInWithOtp({
       email: email,
       options: {
-        emailRedirectTo: `${window.location.origin}/bookclub`,
+        emailRedirectTo: `${window.location.origin}${appPath('/')}`,
       },
     });
 

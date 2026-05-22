@@ -17,7 +17,7 @@ model Profile {
   updatedAt          DateTime         @updatedAt
   is_bookclub_member Boolean          @default(false)
   availabilities     Availability[]
-  recommendations    Recommendation[]
+  recommendedBooks   Book[]           @relation("BookRecommender")
 
   @@map("shared_profiles")
 }
@@ -60,23 +60,26 @@ model Availability {
   @@map("bookclub_availabilities")
 }
 
-model Recommendation {
-  id            String   @id @default(uuid())
-  title         String
-  author        String?
-  recommenderId String
-  createdAt     DateTime @default(now())
-  
-  recommender   Profile  @relation(fields: [recommenderId], references: [id])
-
-  @@map("bookclub_recommendations")
+enum BookStatus {
+  FUTURE_SUGGESTION
+  NEXT
+  COMPLETED
 }
 
-model Settings {
-  id                  String   @id @default(uuid())
-  currentBookTitle    String   @default("The Phoenix Project")
-  currentBookAuthor   String   @default("Gene Kim")
-  currentBookCoverUrl String   @default("https://covers.openlibrary.org/b/id/9151976-L.jpg")
+model Book {
+  id            String     @id @default(uuid())
+  title         String
+  author        String?
+  coverUrl      String?
+  status        BookStatus @default(FUTURE_SUGGESTION)
+  recommenderId String?
+  completedAt   DateTime?
+  selectedAt    DateTime?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  
+  recommender   Profile?   @relation("BookRecommender", fields: [recommenderId], references: [id])
 
-  @@map("bookclub_settings")
+  @@index([status, createdAt])
+  @@map("bookclub_books")
 }

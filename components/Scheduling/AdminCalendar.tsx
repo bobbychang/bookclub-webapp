@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
+import { apiPath } from '@/lib/routes';
 import { DayPicker } from 'react-day-picker';
 import 'react-day-picker/dist/style.css';
 import { format } from 'date-fns';
@@ -18,7 +19,7 @@ export default function AdminCalendar({ pollId, onComplete }: { pollId: string, 
         date: d.toISOString(),
     }));
 
-    const response = await fetch('/bookclub/api/admin/scheduling/propose', {
+    const response = await fetch(apiPath('/api/admin/scheduling/propose'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ pollId, dates: datesToPropose }),

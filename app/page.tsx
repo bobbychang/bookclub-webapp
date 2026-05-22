@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { BOOKCLUB_NAME } from '../lib/constants';
+import { apiPath } from '@/lib/routes';
 import AuthContainer from '@/components/Auth/AuthContainer';
 import DateSelection from '@/components/Scheduling/DateSelection';
 import Recommendations from '@/components/Recommendations';
@@ -13,14 +14,14 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    fetch('/bookclub/api/settings')
+    fetch(apiPath('/api/settings'))
       .then(res => res.ok ? res.json() : null)
       .then(data => {
         if (data && !data.error) setSettings(data);
       })
       .catch(() => {});
 
-    fetch('/bookclub/api/polls')
+    fetch(apiPath('/api/polls'))
       .then(res => res.ok ? res.json() : null)
       .then(data => {
         if (data && data.activeCode) setActivePollCode(data.activeCode);
@@ -29,7 +30,7 @@ export default function Home() {
   }, []);
 
   const handleCreate = async () => {
-    const res = await fetch('/bookclub/api/polls', {
+    const res = await fetch(apiPath('/api/polls'), {
       method: 'POST',
       body: JSON.stringify({ options: [] }),
     });

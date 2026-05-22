@@ -1,9 +1,12 @@
 import { NextResponse } from 'next/server';
-import prisma from '@/lib/prisma'; // Assumed from view_file
+import { BookStatus } from '@prisma/client';
+import prisma from '@/lib/prisma';
+import { fetchBookMetadata } from '@/lib/books';
 
 export async function GET() {
   try {
-    const recommendations = await prisma.recommendation.findMany({
+    const recommendations = await prisma.book.findMany({
+      where: { status: BookStatus.FUTURE_SUGGESTION },
       include: { recommender: true },
       orderBy: { createdAt: 'desc' },
     });
@@ -22,31 +25,22 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing title or recommenderId' }, { status: 400 });
     }
 
-    let author = null;
-    
-    // Try OpenLibrary API
-    try {
-      const searchUrl = `https://openlibrary.org/search.json?title=${encodeURIComponent(title)}&limit=1`;
-      const res = await fetch(searchUrl, {
-        headers: { 'User-Agent': 'ValenciaBookClubWebApp/1.0' }
-      });
-      if (res.ok) {
-        const data = await res.json();
-        if (data.docs && data.docs.length > 0) {
-          const book = data.docs[0];
-          if (book.author_name && book.author_name.length > 0) {
-            author = book.author_name[0];
-          }
-        }
-      }
-    } catch (apiError) {
-      console.error("Failed to fetch from OpenLibrary:", apiError);
+    const existing = await prisma.book.findFirst({
+      where: { title: { equals: title, mode: 'insensitive' } },
+      include: { recommender: true },
+    });
+
+    if (existing) {
+      return NextResponse.json(existing);
     }
 
-    const recommendation = await prisma.recommendation.create({
+    const metadata = await fetchBookMetadata(title);
+    const recommendation = await prisma.book.create({
       data: {
         title,
-        author,
+        author: metadata.author,
+        coverUrl: metadata.coverUrl,
+        status: BookStatus.FUTURE_SUGGESTION,
         recommenderId
       },
       include: { recommender: true }
@@ -64,14 +58,14 @@ export async function DELETE(request: Request) {
     const { id, userId, isAdmin } = await request.json();
     if (!id || !userId) return NextResponse.json({ error: 'Missing parameters' }, { status: 400 });
 
-    const rec = await prisma.recommendation.findUnique({ where: { id } });
+    const rec = await prisma.book.findUnique({ where: { id } });
     if (!rec) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
     if (rec.recommenderId !== userId && !isAdmin) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
-    await prisma.recommendation.delete({ where: { id } });
+    await prisma.book.delete({ where: { id } });
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Failed to delete recommendation:", error);

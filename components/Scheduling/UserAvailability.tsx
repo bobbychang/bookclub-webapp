@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
+import { apiPath } from '@/lib/routes';
 import { Check, X, Minus, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -51,7 +52,7 @@ export default function UserAvailability({
   const handleFinalize = async (dateId: string, dateStr: string) => {
     if (!confirm(`Finalize the meeting for ${format(new Date(dateStr), 'PPP')}?`)) return;
     
-    const response = await fetch('/bookclub/api/admin/scheduling/finalize', {
+    const response = await fetch(apiPath('/api/admin/scheduling/finalize'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ pollId: poll.id, finalDate: dateStr }),

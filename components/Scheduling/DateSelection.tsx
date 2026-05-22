@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/utils/supabase/client';
+import { apiPath } from '@/lib/routes';
 import { Calendar, Check, X, Minus, Loader2, MapPin } from 'lucide-react';
 import { format } from 'date-fns';
 import AdminCalendar from './AdminCalendar';
@@ -78,7 +79,7 @@ export default function DateSelection({ profile }: { profile: any }) {
 
   const handleSaveLocation = async () => {
     setSavingLocation(true);
-    const res = await fetch('/bookclub/api/admin/scheduling/location', {
+    const res = await fetch(apiPath('/api/admin/scheduling/location'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ pollId: poll.id, location: locationInput })

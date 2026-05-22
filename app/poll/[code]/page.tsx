@@ -3,6 +3,7 @@ import { useState, useEffect, use } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import AuthContainer from '@/components/Auth/AuthContainer';
+import { apiPath } from '@/lib/routes';
 
 function PollView({ code, profile }: { code: string, profile: any }) {
   const [poll, setPoll] = useState<any>(null);
@@ -15,7 +16,7 @@ function PollView({ code, profile }: { code: string, profile: any }) {
 
   useEffect(() => {
     const fetchPoll = async () => {
-      const res = await fetch(`/bookclub/api/polls/${code}`);
+      const res = await fetch(apiPath(`/api/polls/${code}`));
       if (res.ok) setPoll(await res.json());
     };
     fetchPoll();
@@ -24,7 +25,7 @@ function PollView({ code, profile }: { code: string, profile: any }) {
   }, [code]);
 
   useEffect(() => {
-    fetch('/bookclub/api/recommendations')
+    fetch(apiPath('/api/recommendations'))
       .then(res => res.ok ? res.json() : [])
       .then(data => {
         if (Array.isArray(data)) setRecommendations(data);
@@ -35,7 +36,7 @@ function PollView({ code, profile }: { code: string, profile: any }) {
   if (!poll) return <div className="text-center mt-20 font-bold">Loading Poll Data...</div>;
 
   const handleNominate = async (title: string) => {
-    await fetch(`/bookclub/api/polls/${code}`, {
+    await fetch(apiPath(`/api/polls/${code}`), {
       method: 'POST',
       body: JSON.stringify({ action: 'nominate', name: profile?.displayName, title, recommenderId: profile?.id }),
     });
@@ -44,12 +45,12 @@ function PollView({ code, profile }: { code: string, profile: any }) {
 
   const handleStartVoting = async () => {
     if (!confirm('Start the voting phase? This cannot be undone.')) return;
-    await fetch(`/bookclub/api/polls/${code}`, { method: 'PATCH' });
+    await fetch(apiPath(`/api/polls/${code}`), { method: 'PATCH' });
   };
 
   const handleVote = async (option: string) => {
     setMyVote(option);
-    await fetch(`/bookclub/api/polls/${code}`, {
+    await fetch(apiPath(`/api/polls/${code}`), {
       method: 'POST',
       body: JSON.stringify({ action: 'vote', name: profile?.displayName, option }),
     });
@@ -58,7 +59,7 @@ function PollView({ code, profile }: { code: string, profile: any }) {
   const handleEndRound = async () => {
     if (!confirm('End current round and eliminate the lowest votes?')) return;
     setMyVote(''); 
-    await fetch(`/bookclub/api/polls/${code}`, { method: 'PATCH' });
+    await fetch(apiPath(`/api/polls/${code}`), { method: 'PATCH' });
   };
 
   const currentRoundIndex = poll.rounds.length - 1;

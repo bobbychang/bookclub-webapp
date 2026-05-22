@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
+import { BookStatus, Prisma } from '@prisma/client';
 import { polls } from '@/lib/store';
 import prisma from '@/lib/prisma';
+import { fetchBookMetadata } from '@/lib/books';
 
 export async function GET(request: Request, { params }: { params: Promise<{ code: string }> }) {
   const { code } = await params;
@@ -26,24 +28,21 @@ export async function POST(request: Request, { params }: { params: Promise<{ cod
      
      poll.nominations[name] = { title };
      
-     // Check if Recommendation already exists
-     const existing = await prisma.recommendation.findFirst({
+     const existing = await prisma.book.findFirst({
         where: { title: { equals: title, mode: 'insensitive' } }
      });
      
      if (!existing && recommenderId) {
-        let author = null;
-        try {
-          const searchUrl = `https://openlibrary.org/search.json?title=${encodeURIComponent(title)}&limit=1`;
-          const res = await fetch(searchUrl, { headers: { 'User-Agent': 'ValenciaBookClubWebApp/1.0' } });
-          const data = await res.json();
-          if (data.docs?.[0]?.author_name?.[0]) {
-             author = data.docs[0].author_name[0];
-          }
-        } catch(e) {}
+        const metadata = await fetchBookMetadata(title);
         
-        await prisma.recommendation.create({
-          data: { title, author, recommenderId }
+        await prisma.book.create({
+          data: {
+            title,
+            author: metadata.author,
+            coverUrl: metadata.coverUrl,
+            status: BookStatus.FUTURE_SUGGESTION,
+            recommenderId
+          }
         });
      }
      return NextResponse.json({ success: true });
@@ -96,26 +95,43 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ co
       poll.status = 'finished';
       poll.winner = poll.options[0]!;
       
-      // Update Settings table dynamically with the new winner and cover Image!
+      // Move the prior next book into history, then promote the winner.
       try {
-          const searchUrl = `https://openlibrary.org/search.json?title=${encodeURIComponent(poll.winner)}&limit=1`;
-          const res = await fetch(searchUrl, { headers: { 'User-Agent': 'ValenciaBookClubWebApp/1.0' } });
-          const data = await res.json();
-          let author = "Unknown";
-          let coverUrl = "https://m.media-amazon.com/images/I/71XyEuH82CL._AC_UF1000,1000_QL80_.jpg";
-          
-          if (data.docs?.[0]) {
-             if (data.docs[0].author_name?.[0]) author = data.docs[0].author_name[0];
-             if (data.docs[0].cover_i) coverUrl = `https://covers.openlibrary.org/b/id/${data.docs[0].cover_i}-L.jpg`;
-          }
-          
-          const settings = await prisma.settings.findFirst();
-          if (settings) {
-            await prisma.settings.update({
-              where: { id: settings.id },
-              data: { currentBookTitle: poll.winner, currentBookAuthor: author, currentBookCoverUrl: coverUrl }
+          const metadata = await fetchBookMetadata(poll.winner);
+
+          await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+            await tx.book.updateMany({
+              where: { status: BookStatus.NEXT },
+              data: { status: BookStatus.COMPLETED, completedAt: new Date() },
             });
-          }
+
+            const existingWinner = await tx.book.findFirst({
+              where: { title: { equals: poll.winner!, mode: 'insensitive' } },
+            });
+
+            if (existingWinner) {
+              await tx.book.update({
+                where: { id: existingWinner.id },
+                data: {
+                  author: existingWinner.author ?? metadata.author,
+                  coverUrl: existingWinner.coverUrl ?? metadata.coverUrl,
+                  status: BookStatus.NEXT,
+                  selectedAt: new Date(),
+                  completedAt: null,
+                },
+              });
+            } else {
+              await tx.book.create({
+                data: {
+                  title: poll.winner!,
+                  author: metadata.author,
+                  coverUrl: metadata.coverUrl,
+                  status: BookStatus.NEXT,
+                  selectedAt: new Date(),
+                },
+              });
+            }
+          });
       } catch(e) {}
     } else {
       poll.rounds.push({ votes: {} });

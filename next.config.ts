@@ -1,6 +1,8 @@
 /** @type {import('next').NextConfig} */
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH || undefined;
+
 const nextConfig = {
-  basePath: '/bookclub',
+  basePath,
   typescript: {
     // !! WARN !!
     // Dangerously allow production builds to successfully complete even if

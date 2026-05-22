@@ -1,7 +1,9 @@
 import { createBrowserClient } from '@supabase/ssr';
 import { type SupabaseClient } from '@supabase/supabase-js';
+import { APP_BASE_PATH } from '@/lib/routes';
 
 let client: SupabaseClient | undefined;
+const cookiePath = APP_BASE_PATH || '/';
 
 export const createClient = () => {
   // Return a fresh client for SSR to avoid state leaks between requests
@@ -11,7 +13,7 @@ export const createClient = () => {
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
         cookieOptions: {
-          path: '/bookclub',
+          path: cookiePath,
         }
       }
     );
@@ -25,7 +27,7 @@ export const createClient = () => {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookieOptions: {
-        path: '/bookclub',
+        path: cookiePath,
       }
     }
   );
