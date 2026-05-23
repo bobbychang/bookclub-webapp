@@ -15,11 +15,10 @@ model Profile {
   isAdmin        Boolean        @default(false)
   createdAt       DateTime         @default(now())
   updatedAt          DateTime         @updatedAt
-  is_bookclub_member Boolean          @default(false)
   availabilities     Availability[]
   recommendedBooks   Book[]           @relation("BookRecommender")
 
-  @@map("shared_profiles")
+  @@map("bookclub_profiles")
 }
 
 model SchedulingPoll {

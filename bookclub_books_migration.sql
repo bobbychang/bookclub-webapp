@@ -36,7 +36,7 @@ DO $$
 BEGIN
   ALTER TABLE "bookclub_books"
     ADD CONSTRAINT "bookclub_books_recommenderId_fkey"
-    FOREIGN KEY ("recommenderId") REFERENCES "shared_profiles"("id")
+    FOREIGN KEY ("recommenderId") REFERENCES "bookclub_profiles"("id")
     ON DELETE SET NULL ON UPDATE CASCADE;
 EXCEPTION
   WHEN duplicate_object THEN NULL;

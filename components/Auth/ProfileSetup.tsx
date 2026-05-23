@@ -37,13 +37,12 @@ export default function ProfileSetup({ onComplete }: { onComplete: () => void })
     const now = new Date().toISOString();
 
     const { error: upsertError } = await supabase
-      .from('shared_profiles')
+      .from('bookclub_profiles')
       .upsert({
         id: user.id,
         email: user.email!,
         displayName: displayName,
         isAdmin: isAdmin,
-        is_bookclub_member: true,
         updatedAt: now,
         createdAt: now,
       }, { onConflict: 'email' });

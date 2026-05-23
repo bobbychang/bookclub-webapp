@@ -26,7 +26,7 @@ export default function DateSelection({ profile }: { profile: any }) {
           *,
           responses:bookclub_availabilities(
             *,
-            user:shared_profiles(displayName)
+            user:bookclub_profiles(displayName)
           )
         )
       `)

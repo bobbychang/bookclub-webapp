@@ -1,10 +1,10 @@
 -- ==============================================================================
 -- Supabase Migration: Table Prefixing (Bookclub to Monolith)
--- Description: Renames the bookclub tables to use the `bookclub_` and `shared_` prefixes.
+-- Description: Renames the bookclub tables to use the `bookclub_` prefix.
 -- ==============================================================================
 
 -- 1. Rename Tables
-ALTER TABLE "Profile" RENAME TO "shared_profiles";
+ALTER TABLE "Profile" RENAME TO "bookclub_profiles";
 ALTER TABLE "SchedulingPoll" RENAME TO "bookclub_scheduling_polls";
 ALTER TABLE "ProposedDate" RENAME TO "bookclub_proposed_dates";
 ALTER TABLE "Availability" RENAME TO "bookclub_availabilities";
@@ -12,7 +12,7 @@ ALTER TABLE "Recommendation" RENAME TO "bookclub_recommendations";
 ALTER TABLE "Settings" RENAME TO "bookclub_settings";
 
 -- 2. Rename Primary Key Constraints
-ALTER INDEX "Profile_pkey" RENAME TO "shared_profiles_pkey";
+ALTER INDEX "Profile_pkey" RENAME TO "bookclub_profiles_pkey";
 ALTER INDEX "SchedulingPoll_pkey" RENAME TO "bookclub_scheduling_polls_pkey";
 ALTER INDEX "ProposedDate_pkey" RENAME TO "bookclub_proposed_dates_pkey";
 ALTER INDEX "Availability_pkey" RENAME TO "bookclub_availabilities_pkey";
@@ -31,4 +31,4 @@ ALTER INDEX "Settings_pkey" RENAME TO "bookclub_settings_pkey";
 -- but if they reference table names in string logic or function queries, they must be updated.
 
 -- Example: 
--- ALTER POLICY "Users can update own profile" ON "shared_profiles" ...
+-- ALTER POLICY "Users can update own profile" ON "bookclub_profiles" ...

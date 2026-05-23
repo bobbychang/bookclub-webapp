@@ -44,13 +44,12 @@ export default function ProfileWidget({ auth }: { auth: AuthContextType }) {
     const now = new Date().toISOString();
 
     const { error } = await supabase
-      .from('shared_profiles')
+      .from('bookclub_profiles')
       .upsert({
         id: userId,
         email: session?.user?.email,
         displayName: displayName,
         isAdmin: isAdmin,
-        is_bookclub_member: true,
         updatedAt: now,
       } as any, { onConflict: 'email' });
 
