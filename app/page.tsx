@@ -8,8 +8,15 @@ import DateSelection from '@/components/Scheduling/DateSelection';
 import Recommendations from '@/components/Recommendations';
 import ProfileWidget from '@/components/Auth/ProfileWidget';
 
+type BookSettings = {
+  hasCurrentBook: boolean;
+  currentBookTitle: string;
+  currentBookAuthor: string | null;
+  currentBookCoverUrl: string | null;
+};
+
 export default function Home() {
-  const [settings, setSettings] = useState<any>(null);
+  const [settings, setSettings] = useState<BookSettings | null>(null);
   const [activePollCode, setActivePollCode] = useState<string | null>(null);
   const router = useRouter();
 
@@ -48,7 +55,11 @@ export default function Home() {
               <h1 className="text-4xl font-extrabold tracking-tight text-foreground">{BOOKCLUB_NAME}</h1>
               {settings ? (
                 <p className="text-xl text-muted-foreground font-medium animate-fade-in">
-                  The next book is <span className="text-primary font-bold">{settings.currentBookTitle}</span> by {settings.currentBookAuthor}
+                  {settings.hasCurrentBook ? (
+                    <>The next book is <span className="text-primary font-bold">{settings.currentBookTitle}</span> by {settings.currentBookAuthor}</>
+                  ) : (
+                    <span className="text-primary font-bold">{settings.currentBookTitle}</span>
+                  )}
                 </p>
               ) : (
                 <p className="text-xl text-muted-foreground font-medium animate-pulse">Loading current book...</p>
@@ -56,7 +67,7 @@ export default function Home() {
             </div>
 
             <div className="flex flex-col items-center gap-8">
-              {settings && (
+              {settings?.hasCurrentBook ? (
                 <div className="relative w-64 h-96 overflow-hidden rounded-2xl shadow-2xl transition-transform hover:scale-105 duration-300">
                   <img 
                     src={settings.currentBookCoverUrl} 
@@ -64,7 +75,11 @@ export default function Home() {
                     className="w-full h-full object-cover"
                   />
                 </div>
-              )}
+              ) : settings ? (
+                <div className="w-64 h-96 rounded-2xl border-2 border-dashed border-border bg-secondary shadow-inner flex items-center justify-center p-8 text-center">
+                  <p className="text-lg font-bold text-muted-foreground">{settings.currentBookTitle}</p>
+                </div>
+              ) : null}
               
               <ProfileWidget auth={auth} />
 
