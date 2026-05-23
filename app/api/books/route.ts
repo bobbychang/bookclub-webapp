@@ -33,11 +33,19 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const { title, recommenderId, status } = await request.json();
+    const { title, author, completedAt, recommenderId, status, userId, isAdmin } = await request.json();
     const bookStatus = parseStatus(status) ?? BookStatus.FUTURE_SUGGESTION;
 
-    if (!title || !recommenderId) {
-      return NextResponse.json({ error: 'Missing title or recommenderId' }, { status: 400 });
+    if (!title) {
+      return NextResponse.json({ error: 'Missing title' }, { status: 400 });
+    }
+
+    if (bookStatus === BookStatus.FUTURE_SUGGESTION && !recommenderId) {
+      return NextResponse.json({ error: 'Missing recommenderId' }, { status: 400 });
+    }
+
+    if (bookStatus !== BookStatus.FUTURE_SUGGESTION && (!userId || !isAdmin)) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
     const existing = await prisma.book.findFirst({
@@ -46,17 +54,35 @@ export async function POST(request: Request) {
     });
 
     if (existing) {
-      return NextResponse.json(existing);
+      if (bookStatus === existing.status) {
+        return NextResponse.json(existing);
+      }
+
+      const updatedBook = await prisma.book.update({
+        where: { id: existing.id },
+        data: {
+          author: author?.trim() || existing.author,
+          status: bookStatus,
+          recommenderId: recommenderId || existing.recommenderId,
+          completedAt: bookStatus === BookStatus.COMPLETED ? (completedAt ? new Date(completedAt) : new Date()) : null,
+          selectedAt: bookStatus === BookStatus.NEXT ? new Date() : existing.selectedAt,
+        },
+        include: { recommender: true },
+      });
+
+      return NextResponse.json(updatedBook);
     }
 
     const metadata = await fetchBookMetadata(title);
     const book = await prisma.book.create({
       data: {
         title,
-        author: metadata.author,
+        author: author?.trim() || metadata.author,
         coverUrl: metadata.coverUrl,
         status: bookStatus,
-        recommenderId,
+        recommenderId: recommenderId || null,
+        completedAt: bookStatus === BookStatus.COMPLETED ? (completedAt ? new Date(completedAt) : new Date()) : null,
+        selectedAt: bookStatus === BookStatus.NEXT ? new Date() : null,
       },
       include: { recommender: true },
     });
