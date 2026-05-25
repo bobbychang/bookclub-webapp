@@ -26,7 +26,8 @@ export async function GET() {
       currentBookAuthor: nextBook.author ?? "Unknown",
       currentBookCoverUrl: defaultBookCoverUrl(nextBook.coverUrl),
     });
-  } catch {
+  } catch (error) {
+    console.error("Failed to fetch settings:", error);
     return NextResponse.json({ error: 'Failed to fetch settings' }, { status: 500 });
   }
 }

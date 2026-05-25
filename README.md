@@ -198,7 +198,7 @@ NEXT_PUBLIC_BASE_PATH=
 
 Notes:
 
-- Prisma uses `DATABASE_URL`.
+- Prisma uses `DATABASE_URL`. When using the Supabase transaction pooler, include `pgbouncer=true` in the URL query string, for example `?sslmode=require&pgbouncer=true`.
 - Schema pushes and direct database operations may require `DIRECT_URL`.
 - Supabase pooler connections commonly use port `6543` with `sslmode=require`.
 - Direct Supabase connections commonly use port `5432`.
