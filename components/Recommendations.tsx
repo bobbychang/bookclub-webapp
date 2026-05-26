@@ -1,6 +1,8 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { apiPath } from '@/lib/routes';
+import { getApiErrorMessage, getUnknownApiErrorMessage } from '@/lib/apiErrors';
+import ApiErrorMessage from '@/components/ApiErrorMessage';
 
 type BookStatus = 'FUTURE_SUGGESTION' | 'NEXT' | 'COMPLETED';
 
@@ -38,18 +40,42 @@ export default function Recommendations({ profile }: { profile: CurrentProfile |
   const [previousCompletedAt, setPreviousCompletedAt] = useState('');
   const [loading, setLoading] = useState(false);
   const [previousLoading, setPreviousLoading] = useState(false);
+  const [booksError, setBooksError] = useState<string | null>(null);
+  const [profilesError, setProfilesError] = useState<string | null>(null);
 
   const fetchBooks = async () => {
-    const res = await fetch(apiPath('/api/books'));
-    if (res.ok) {
+    try {
+      setBooksError(null);
+      const res = await fetch(apiPath('/api/books'));
+
+      if (!res.ok) {
+        setBooksError(await getApiErrorMessage(res, 'Book lists could not load'));
+        return false;
+      }
+
       setBooks(await res.json());
+      return true;
+    } catch {
+      setBooksError(getUnknownApiErrorMessage('Book lists could not load'));
+      return false;
     }
   };
 
   const fetchProfiles = async () => {
-    const res = await fetch(apiPath('/api/profiles'));
-    if (res.ok) {
+    try {
+      setProfilesError(null);
+      const res = await fetch(apiPath('/api/profiles'));
+
+      if (!res.ok) {
+        setProfilesError(await getApiErrorMessage(res, 'Bookclub members could not load'));
+        return false;
+      }
+
       setProfiles(await res.json());
+      return true;
+    } catch {
+      setProfilesError(getUnknownApiErrorMessage('Bookclub members could not load'));
+      return false;
     }
   };
 
@@ -73,35 +99,44 @@ export default function Recommendations({ profile }: { profile: CurrentProfile |
     if (!title.trim()) return;
 
     setLoading(true);
-    const res = await fetch(apiPath('/api/books'), {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        title: title.trim(),
-        recommenderId: profile?.id
-      })
-    });
+    try {
+      const res = await fetch(apiPath('/api/books'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: title.trim(),
+          recommenderId: profile?.id
+        })
+      });
 
-    if (res.ok) {
-      setTitle('');
-      await fetchBooks();
-    } else {
-      alert("Failed to add recommendation.");
+      if (res.ok) {
+        setTitle('');
+        await fetchBooks();
+      } else {
+        alert(await getApiErrorMessage(res, 'Failed to add recommendation'));
+      }
+    } catch {
+      alert(getUnknownApiErrorMessage('Failed to add recommendation'));
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to remove this recommendation?')) return;
-    const res = await fetch(apiPath('/api/books'), {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id, userId: profile?.id, isAdmin: profile?.isAdmin })
-    });
-    if (res.ok) {
-      await fetchBooks();
-    } else {
-      alert("Failed to delete recommendation.");
+    try {
+      const res = await fetch(apiPath('/api/books'), {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, userId: profile?.id, isAdmin: profile?.isAdmin })
+      });
+      if (res.ok) {
+        await fetchBooks();
+      } else {
+        alert(await getApiErrorMessage(res, 'Failed to delete book'));
+      }
+    } catch {
+      alert(getUnknownApiErrorMessage('Failed to delete book'));
     }
   };
 
@@ -111,16 +146,20 @@ export default function Recommendations({ profile }: { profile: CurrentProfile |
       : 'Move this book to previous books?';
     if (!confirm(message)) return;
 
-    const res = await fetch(apiPath('/api/books'), {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id, status, userId: profile?.id, isAdmin: profile?.isAdmin })
-    });
+    try {
+      const res = await fetch(apiPath('/api/books'), {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, status, userId: profile?.id, isAdmin: profile?.isAdmin })
+      });
 
-    if (res.ok) {
-      await fetchBooks();
-    } else {
-      alert("Failed to update book.");
+      if (res.ok) {
+        await fetchBooks();
+      } else {
+        alert(await getApiErrorMessage(res, 'Failed to update book'));
+      }
+    } catch {
+      alert(getUnknownApiErrorMessage('Failed to update book'));
     }
   };
 
@@ -129,30 +168,35 @@ export default function Recommendations({ profile }: { profile: CurrentProfile |
     if (!previousTitle.trim() || !profile?.isAdmin) return;
 
     setPreviousLoading(true);
-    const res = await fetch(apiPath('/api/books'), {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        title: previousTitle.trim(),
-        author: previousAuthor.trim() || undefined,
-        recommenderId: previousRecommenderId || undefined,
-        completedAt: previousCompletedAt || undefined,
-        status: 'COMPLETED',
-        userId: profile?.id,
-        isAdmin: profile?.isAdmin,
-      })
-    });
+    try {
+      const res = await fetch(apiPath('/api/books'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: previousTitle.trim(),
+          author: previousAuthor.trim() || undefined,
+          recommenderId: previousRecommenderId || undefined,
+          completedAt: previousCompletedAt || undefined,
+          status: 'COMPLETED',
+          userId: profile?.id,
+          isAdmin: profile?.isAdmin,
+        })
+      });
 
-    if (res.ok) {
-      setPreviousTitle('');
-      setPreviousAuthor('');
-      setPreviousRecommenderId('');
-      setPreviousCompletedAt('');
-      await fetchBooks();
-    } else {
-      alert("Failed to add previous book.");
+      if (res.ok) {
+        setPreviousTitle('');
+        setPreviousAuthor('');
+        setPreviousRecommenderId('');
+        setPreviousCompletedAt('');
+        await fetchBooks();
+      } else {
+        alert(await getApiErrorMessage(res, 'Failed to add previous book'));
+      }
+    } catch {
+      alert(getUnknownApiErrorMessage('Failed to add previous book'));
+    } finally {
+      setPreviousLoading(false);
     }
-    setPreviousLoading(false);
   };
 
   return (
@@ -160,6 +204,15 @@ export default function Recommendations({ profile }: { profile: CurrentProfile |
       <section>
         <h2 className="text-2xl font-bold text-foreground mb-2">Community Recommendations</h2>
         <p className="text-muted-foreground text-sm mb-6">Looking for our next read? Drop a title below!</p>
+        {booksError && (
+          <div className="mb-6">
+            <ApiErrorMessage
+              title="Books failed to load"
+              message={booksError}
+              onRetry={fetchBooks}
+            />
+          </div>
+        )}
       
         <form onSubmit={handleSubmit} className="flex gap-3 mb-8">
           <input
@@ -180,7 +233,7 @@ export default function Recommendations({ profile }: { profile: CurrentProfile |
         </form>
 
         <div className="space-y-4">
-          {suggestions.length === 0 ? (
+          {booksError && books.length === 0 ? null : suggestions.length === 0 ? (
             <p className="text-muted-foreground text-center py-6 italic">No recommendations yet. Be the first!</p>
           ) : (
             suggestions.map(rec => (
@@ -225,6 +278,13 @@ export default function Recommendations({ profile }: { profile: CurrentProfile |
         <h2 className="text-2xl font-bold text-foreground mb-4">Previous Books</h2>
         {profile?.isAdmin && (
           <form onSubmit={handlePreviousSubmit} className="mb-6 rounded-xl border border-border bg-secondary p-4 space-y-3">
+            {profilesError && (
+              <ApiErrorMessage
+                title="Members failed to load"
+                message={profilesError}
+                onRetry={fetchProfiles}
+              />
+            )}
             <div className="grid gap-3 sm:grid-cols-2">
               <input
                 type="text"
@@ -246,9 +306,9 @@ export default function Recommendations({ profile }: { profile: CurrentProfile |
                 value={previousRecommenderId}
                 onChange={e => setPreviousRecommenderId(e.target.value)}
                 className="border-2 border-border p-3 rounded-xl focus:ring-2 focus:ring-primary outline-none bg-background"
-                disabled={previousLoading}
+                disabled={previousLoading || Boolean(profilesError)}
               >
-                <option value="">Unknown recommender</option>
+                <option value="">{profilesError ? 'Members failed to load' : 'Unknown recommender'}</option>
                 {profiles.map(member => (
                   <option key={member.id} value={member.id}>
                     {member.displayName || member.email || 'Unnamed member'}
@@ -272,7 +332,7 @@ export default function Recommendations({ profile }: { profile: CurrentProfile |
             </button>
           </form>
         )}
-        {completedBooks.length === 0 ? (
+        {booksError && books.length === 0 ? null : completedBooks.length === 0 ? (
           <p className="text-muted-foreground text-center py-6 italic">No completed books have been recorded yet.</p>
         ) : (
           <div className="overflow-x-auto rounded-xl border border-border">

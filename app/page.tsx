@@ -3,6 +3,8 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { BOOKCLUB_NAME } from '../lib/constants';
 import { apiPath } from '@/lib/routes';
+import { getApiErrorMessage, getUnknownApiErrorMessage } from '@/lib/apiErrors';
+import ApiErrorMessage from '@/components/ApiErrorMessage';
 import AuthContainer from '@/components/Auth/AuthContainer';
 import DateSelection from '@/components/Scheduling/DateSelection';
 import Recommendations from '@/components/Recommendations';
@@ -17,23 +19,52 @@ type BookSettings = {
 
 export default function Home() {
   const [settings, setSettings] = useState<BookSettings | null>(null);
+  const [settingsError, setSettingsError] = useState<string | null>(null);
   const [activePollCode, setActivePollCode] = useState<string | null>(null);
+  const [pollsError, setPollsError] = useState<string | null>(null);
   const router = useRouter();
 
-  useEffect(() => {
-    fetch(apiPath('/api/settings'))
-      .then(res => res.ok ? res.json() : null)
-      .then(data => {
-        if (data && !data.error) setSettings(data);
-      })
-      .catch(() => {});
+  const fetchSettings = async () => {
+    try {
+      setSettingsError(null);
+      const res = await fetch(apiPath('/api/settings'));
 
-    fetch(apiPath('/api/polls'))
-      .then(res => res.ok ? res.json() : null)
-      .then(data => {
-        if (data && data.activeCode) setActivePollCode(data.activeCode);
-      })
-      .catch(() => {});
+      if (!res.ok) {
+        setSettings(null);
+        setSettingsError(await getApiErrorMessage(res, 'Current book could not load'));
+        return;
+      }
+
+      const data = await res.json();
+      if (data && !data.error) setSettings(data);
+    } catch {
+      setSettings(null);
+      setSettingsError(getUnknownApiErrorMessage('Current book could not load'));
+    }
+  };
+
+  const fetchPolls = async () => {
+    try {
+      setPollsError(null);
+      const res = await fetch(apiPath('/api/polls'));
+
+      if (!res.ok) {
+        setActivePollCode(null);
+        setPollsError(await getApiErrorMessage(res, 'Book selection status could not load'));
+        return;
+      }
+
+      const data = await res.json();
+      setActivePollCode(data?.activeCode ?? null);
+    } catch {
+      setActivePollCode(null);
+      setPollsError(getUnknownApiErrorMessage('Book selection status could not load'));
+    }
+  };
+
+  useEffect(() => {
+    void fetchSettings();
+    void fetchPolls();
   }, []);
 
   const handleCreate = async () => {
@@ -61,8 +92,15 @@ export default function Home() {
                     <span className="text-primary font-bold">{settings.currentBookTitle}</span>
                   )}
                 </p>
-              ) : (
+              ) : settingsError ? null : (
                 <p className="text-xl text-muted-foreground font-medium animate-pulse">Loading current book...</p>
+              )}
+              {settingsError && (
+                <ApiErrorMessage
+                  title="Current book failed to load"
+                  message={settingsError}
+                  onRetry={fetchSettings}
+                />
               )}
             </div>
 
@@ -89,7 +127,16 @@ export default function Home() {
 
             <div className="mt-12 p-8 border-2 border-border rounded-3xl bg-background shadow-xl flex flex-col items-center justify-center text-center space-y-4">
               <h2 className="text-2xl font-bold text-foreground">Book Selection</h2>
-              {activePollCode ? (
+              {pollsError && (
+                <div className="w-full">
+                  <ApiErrorMessage
+                    title="Book selection failed to load"
+                    message={pollsError}
+                    onRetry={fetchPolls}
+                  />
+                </div>
+              )}
+              {pollsError ? null : activePollCode ? (
                 <>
                   <p className="text-muted-foreground">There is currently an active book selection process underway!</p>
                   <button 
