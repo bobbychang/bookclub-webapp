@@ -82,3 +82,12 @@ model Book {
   @@index([status, createdAt])
   @@map("bookclub_books")
 }
+
+model BookPoll {
+  code      String   @id
+  data      Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("bookclub_book_polls")
+}
