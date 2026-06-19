@@ -46,17 +46,20 @@ export async function POST(request: Request, { params }: { params: Promise<{ cod
     });
 
     if (!existing && recommenderId) {
-      const metadata = await fetchBookMetadata(title);
-
-      await prisma.book.create({
-        data: {
-          title,
-          author: metadata.author,
-          coverUrl: metadata.coverUrl,
-          status: BookStatus.FUTURE_SUGGESTION,
-          recommenderId,
-        },
-      });
+      try {
+        const metadata = await fetchBookMetadata(title);
+        await prisma.book.create({
+          data: {
+            title,
+            author: metadata.author,
+            coverUrl: metadata.coverUrl,
+            status: BookStatus.FUTURE_SUGGESTION,
+            recommenderId,
+          },
+        });
+      } catch (e) {
+        // Book creation is best-effort; nomination still saves even if it fails
+      }
     }
 
     await savePoll(poll);
