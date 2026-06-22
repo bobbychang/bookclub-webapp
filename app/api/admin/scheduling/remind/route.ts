@@ -7,7 +7,7 @@ import { format } from 'date-fns';
 import { BOOKCLUB_NAME } from '@/lib/constants';
 
 const APP_URL = 'https://bookclub.bobbychang.co';
-const FROM_ADDRESS = `${BOOKCLUB_NAME} <noreply@bookclub.bobbychang.co>`;
+const FROM_ADDRESS = `${BOOKCLUB_NAME} <noreply@bobbychang.co>`;
 
 export async function POST(request: Request) {
   const cookieStore = await cookies();

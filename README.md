@@ -43,6 +43,7 @@ Scheduling uses persistent Supabase/PostgreSQL tables.
 - Admins can add or edit the finalized location.
 - Members can continue to RSVP `YES`, `MAYBE`, or `NO` for the finalized date.
 - Admins can start a new scheduling round after one is finalized.
+- During voting, admins see which members have not yet responded (by display name) and can send them a reminder email via Resend.
 
 ### Book Recommendations and History
 
@@ -126,6 +127,7 @@ Book selection is a ranked-choice-style elimination poll implemented in memory, 
 - Database: Supabase PostgreSQL via Prisma
 - ORM: Prisma 6.2.1
 - Date UI: `react-day-picker`
+- Email: Resend, sending from `noreply@bobbychang.co`
 - Tests: Playwright
 - Deployment: Vercel 
 - Version Control: github at `git@github.com:bobbychang/bookclub-webapp.git`
@@ -194,6 +196,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 NEXT_PUBLIC_DEV_MODE=false
 NEXT_PUBLIC_BASE_PATH=
+RESEND_API_KEY=
 ```
 
 Notes:
@@ -204,6 +207,7 @@ Notes:
 - Direct Supabase connections commonly use port `5432`.
 - Set `NEXT_PUBLIC_BASE_PATH=/bookclub` when serving the app under that path.
 - `NEXT_PUBLIC_DEV_MODE=true` enables instant login and should be handled carefully if pointed at production data.
+- `RESEND_API_KEY` is required for scheduling reminder emails. The Resend account is registered under `bobbychang.co` and sends from `noreply@bobbychang.co`. Do not add `bookclub.bobbychang.co` as a Resend domain — the account is on the free plan which allows one domain.
 
 ## Local Development
 
