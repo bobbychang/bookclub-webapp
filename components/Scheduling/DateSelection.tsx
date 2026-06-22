@@ -58,20 +58,15 @@ export default function DateSelection({ profile }: { profile: any }) {
 
   const handleStartProposing = async () => {
     setLoading(true);
-    const now = new Date().toISOString();
-    const { data, error } = await supabase.from('bookclub_scheduling_polls').insert({ 
-        id: crypto.randomUUID(),
-        status: 'PROPOSING',
-        createdAt: now,
-        updatedAt: now
-    } as any).select().single();
+    const res = await fetch(apiPath('/api/admin/scheduling/start'), { method: 'POST' });
+    const data = await res.json();
 
-    if (error) {
-        alert('Failed to start proposing: ' + error.message);
+    if (!res.ok) {
+        alert('Failed to start proposing: ' + (data.error ?? res.statusText));
         setLoading(false);
     } else {
         // Explicitly include empty dates array to prevent crashes
-        setPoll({ ...(data as any), dates: [] });
+        setPoll({ ...data, dates: [] });
         setLocationInput('');
         setLoading(false);
     }

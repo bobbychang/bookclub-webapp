@@ -108,7 +108,7 @@ export default function Home() {
               {settings?.hasCurrentBook ? (
                 <div className="relative w-64 h-96 overflow-hidden rounded-2xl shadow-2xl transition-transform hover:scale-105 duration-300">
                   <img 
-                    src={settings.currentBookCoverUrl} 
+                    src={settings.currentBookCoverUrl ?? undefined}
                     alt={`Cover of ${settings.currentBookTitle}`}
                     className="w-full h-full object-cover"
                   />
