@@ -214,19 +214,19 @@ export default function Recommendations({ profile }: { profile: CurrentProfile |
           </div>
         )}
       
-        <form onSubmit={handleSubmit} className="flex gap-3 mb-8">
+        <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 mb-8">
           <input
             type="text"
             value={title}
             onChange={e => setTitle(e.target.value)}
             placeholder={profile?.displayName ? "Enter a book title..." : "Set a display name above to recommend!"}
-            className="flex-1 border-2 border-border p-3 rounded-xl focus:ring-2 focus:ring-primary outline-none transition-all disabled:opacity-50"
+            className="flex-1 min-w-0 border-2 border-border p-3 rounded-xl focus:ring-2 focus:ring-primary outline-none transition-all disabled:opacity-50"
             disabled={loading || !profile?.displayName}
           />
           <button
             type="submit"
             disabled={loading || !profile?.displayName}
-            className="bg-primary text-primary-foreground px-6 font-bold rounded-xl shadow-lg hover:opacity-90 disabled:bg-gray-400 transition-all active:scale-95"
+            className="shrink-0 bg-primary text-primary-foreground px-6 py-3 font-bold rounded-xl shadow-lg hover:opacity-90 disabled:bg-gray-400 transition-all active:scale-95"
           >
             {loading ? 'Adding...' : 'Recommend'}
           </button>
