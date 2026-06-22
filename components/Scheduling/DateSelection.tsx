@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { apiPath } from '@/lib/routes';
-import { Calendar, Check, X, Minus, Loader2, MapPin } from 'lucide-react';
+import { Calendar, Check, X, Minus, Loader2, MapPin, Bell } from 'lucide-react';
 import { format } from 'date-fns';
 import AdminCalendar from './AdminCalendar';
 import UserAvailability from './UserAvailability';
@@ -15,6 +15,9 @@ export default function DateSelection({ profile }: { profile: any }) {
   const [editingLocation, setEditingLocation] = useState(false);
   const [locationInput, setLocationInput] = useState('');
   const [savingLocation, setSavingLocation] = useState(false);
+  const [allProfiles, setAllProfiles] = useState<any[]>([]);
+  const [sendingReminders, setSendingReminders] = useState(false);
+  const [reminderResult, setReminderResult] = useState<{ sent: string[]; errors?: string[] } | null>(null);
   const supabase = createClient();
 
   const fetchPoll = useCallback(async () => {
@@ -42,6 +45,15 @@ export default function DateSelection({ profile }: { profile: any }) {
     if (activePoll) setLocationInput(activePoll.location || '');
     setLoading(false);
   }, [supabase]);
+
+  useEffect(() => {
+    if (poll?.status === 'VOTING' && profile?.isAdmin) {
+      fetch(apiPath('/api/profiles'))
+        .then(r => r.json())
+        .then(data => setAllProfiles(Array.isArray(data) ? data : []))
+        .catch(() => {});
+    }
+  }, [poll?.status, profile?.isAdmin]);
 
   useEffect(() => {
     fetchPoll();
@@ -87,6 +99,23 @@ export default function DateSelection({ profile }: { profile: any }) {
         alert("Failed to save location: " + err.error);
     }
     setSavingLocation(false);
+  };
+
+  const handleSendReminders = async () => {
+    setSendingReminders(true);
+    setReminderResult(null);
+    const res = await fetch(apiPath('/api/admin/scheduling/remind'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pollId: poll.id }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      alert('Failed to send reminders: ' + (data.error ?? res.statusText));
+    } else {
+      setReminderResult(data);
+    }
+    setSendingReminders(false);
   };
 
   if (loading && !poll) return <div className="flex justify-center p-8"><Loader2 className="animate-spin text-blue-600" /></div>;
@@ -202,6 +231,49 @@ export default function DateSelection({ profile }: { profile: any }) {
         )}
 
         <AvailabilityGrid dates={poll.dates || []} />
+
+        {profile?.isAdmin && poll.status === 'VOTING' && (() => {
+          const respondedIds = new Set((poll.dates || []).flatMap((d: any) => d.responses.map((r: any) => r.userId)));
+          const pending = allProfiles.filter(p => !respondedIds.has(p.id));
+
+          return (
+            <div className="pt-6 border-t border-border mt-4 space-y-3">
+              <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-widest">Awaiting Response</h3>
+
+              {pending.length === 0 ? (
+                <p className="text-sm text-green-600 font-medium">Everyone has responded!</p>
+              ) : (
+                <>
+                  <div className="flex flex-wrap gap-2">
+                    {pending.map(p => (
+                      <span key={p.id} className="text-sm bg-amber-50 text-amber-800 border border-amber-200 px-3 py-1 rounded-full font-medium">
+                        {p.displayName || p.email}
+                      </span>
+                    ))}
+                  </div>
+
+                  {reminderResult ? (
+                    <div className="text-sm text-green-700 font-medium pt-1">
+                      ✓ Sent to: {reminderResult.sent.join(', ') || 'nobody (all responded)'}
+                      {reminderResult.errors && reminderResult.errors.length > 0 && (
+                        <span className="text-red-600 ml-2">Errors: {reminderResult.errors.join(', ')}</span>
+                      )}
+                    </div>
+                  ) : (
+                    <button
+                      onClick={handleSendReminders}
+                      disabled={sendingReminders}
+                      className="flex items-center gap-2 text-sm font-bold bg-amber-500 hover:opacity-90 text-white px-4 py-2 rounded-xl disabled:opacity-50 transition-all"
+                    >
+                      {sendingReminders ? <Loader2 className="animate-spin w-4 h-4" /> : <Bell className="w-4 h-4" />}
+                      Send Reminder{pending.length > 1 ? `s (${pending.length})` : ''}
+                    </button>
+                  )}
+                </>
+              )}
+            </div>
+          );
+        })()}
       </div>
     </div>
   );
