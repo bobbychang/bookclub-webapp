@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect, use } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import AuthContainer from '@/components/Auth/AuthContainer';
 import { apiPath } from '@/lib/routes';
@@ -11,7 +11,8 @@ function PollView({ code, profile }: { code: string, profile: any }) {
   const [nominationTitle, setNominationTitle] = useState('');
   const [recommendations, setRecommendations] = useState<any[]>([]);
   const searchParams = useSearchParams();
-  
+  const router = useRouter();
+
   const isAdmin = searchParams.get('admin') === 'true' || profile?.email === 'rchang915@gmail.com';
 
   useEffect(() => {
@@ -58,8 +59,14 @@ function PollView({ code, profile }: { code: string, profile: any }) {
 
   const handleEndRound = async () => {
     if (!confirm('End current round and eliminate the lowest votes?')) return;
-    setMyVote(''); 
+    setMyVote('');
     await fetch(apiPath(`/api/polls/${code}`), { method: 'PATCH' });
+  };
+
+  const handleResetPoll = async () => {
+    if (!confirm('Delete this poll permanently? This will allow a new poll to be started.')) return;
+    const res = await fetch(apiPath(`/api/polls/${code}`), { method: 'DELETE' });
+    if (res.ok) router.push('/');
   };
 
   const currentRoundIndex = poll.rounds.length - 1;
@@ -75,18 +82,25 @@ function PollView({ code, profile }: { code: string, profile: any }) {
           </Link>
           <h1 className="text-2xl font-bold">Poll: {poll.code}</h1>
         </div>
-        {isAdmin && poll.status === 'nominating' && (
-          <button onClick={handleStartVoting} className="bg-primary hover:opacity-90 text-primary-foreground px-4 py-2 rounded-lg font-semibold text-sm transition-colors">
-            Start Voting Phase
-          </button>
-        )}
-        {isAdmin && poll.status === 'voting' && (
-          <div className="flex items-center gap-3">
-             <span className="text-sm font-bold text-blue-800 bg-blue-100 px-3 py-2 rounded-lg">
-              Votes Cast: {totalVotesThisRound}
-            </span>
-            <button onClick={handleEndRound} className="bg-red-500 hover:bg-red-600 text-primary-foreground px-4 py-2 rounded-lg font-semibold text-sm transition-colors">
-              End Round {currentRoundIndex + 1}
+        {isAdmin && (
+          <div className="flex items-center gap-2">
+            {poll.status === 'nominating' && (
+              <button onClick={handleStartVoting} className="bg-primary hover:opacity-90 text-primary-foreground px-4 py-2 rounded-lg font-semibold text-sm transition-colors">
+                Start Voting Phase
+              </button>
+            )}
+            {poll.status === 'voting' && (
+              <>
+                <span className="text-sm font-bold text-blue-800 bg-blue-100 px-3 py-2 rounded-lg">
+                  Votes Cast: {totalVotesThisRound}
+                </span>
+                <button onClick={handleEndRound} className="bg-red-500 hover:bg-red-600 text-primary-foreground px-4 py-2 rounded-lg font-semibold text-sm transition-colors">
+                  End Round {currentRoundIndex + 1}
+                </button>
+              </>
+            )}
+            <button onClick={handleResetPoll} className="border border-red-300 text-red-600 hover:bg-red-50 px-3 py-2 rounded-lg font-semibold text-sm transition-colors" title="Delete this poll">
+              Reset Poll
             </button>
           </div>
         )}

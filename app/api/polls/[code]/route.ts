@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 import { BookStatus, Prisma } from '@prisma/client';
 import prisma from '@/lib/prisma';
+import { createClient } from '@/utils/supabase/server';
 import { fetchBookMetadata } from '@/lib/books';
 import type { Poll } from '@/lib/store';
 
@@ -161,4 +163,20 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ co
 
   await savePoll(poll);
   return NextResponse.json(poll);
+}
+
+export async function DELETE(request: Request, { params }: { params: Promise<{ code: string }> }) {
+  const cookieStore = await cookies();
+  const supabase = createClient(cookieStore);
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  const profile = await prisma.profile.findUnique({ where: { id: user.id } });
+  if (!profile?.isAdmin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+
+  const { code } = await params;
+  const deleted = await prisma.bookPoll.deleteMany({ where: { code: code.toUpperCase() } });
+  if (deleted.count === 0) return NextResponse.json({ error: 'Poll not found' }, { status: 404 });
+  return NextResponse.json({ success: true });
 }

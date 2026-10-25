@@ -73,7 +73,16 @@ export default function Home() {
       body: JSON.stringify({ options: [] }),
     });
     const { code } = await res.json();
-    router.push(`/poll/${code}?admin=true`); 
+    router.push(`/poll/${code}?admin=true`);
+  };
+
+  const handleResetPoll = async () => {
+    if (!activePollCode) return;
+    if (!confirm('Delete the active poll permanently? This will allow a new poll to be started.')) return;
+    const res = await fetch(apiPath(`/api/polls/${activePollCode}`), { method: 'DELETE' });
+    if (res.ok) {
+      setActivePollCode(null);
+    }
   };
 
   return (
@@ -139,12 +148,20 @@ export default function Home() {
               {pollsError ? null : activePollCode ? (
                 <>
                   <p className="text-muted-foreground">There is currently an active book selection process underway!</p>
-                  <button 
-                    onClick={() => router.push(`/poll/${activePollCode}`)} 
+                  <button
+                    onClick={() => router.push(`/poll/${activePollCode}`)}
                     className="bg-primary hover:opacity-90 text-primary-foreground font-bold py-3 px-8 rounded-xl shadow-lg transform active:scale-95 transition-all"
                   >
                     Go to Active Poll
                   </button>
+                  {profile?.isAdmin && (
+                    <button
+                      onClick={handleResetPoll}
+                      className="border border-red-300 text-red-600 hover:bg-red-50 font-semibold py-2 px-6 rounded-xl transition-colors text-sm"
+                    >
+                      Reset Poll
+                    </button>
+                  )}
                 </>
               ) : (
                 <>
