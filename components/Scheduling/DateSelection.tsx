@@ -101,6 +101,24 @@ export default function DateSelection({ profile }: { profile: any }) {
     setSavingLocation(false);
   };
 
+  const handleResetPoll = async () => {
+    if (!poll) return;
+    if (!confirm('Reset this scheduling round? All proposed dates and availability responses will be deleted.')) return;
+    setLoading(true);
+    const res = await fetch(apiPath('/api/admin/scheduling/reset'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pollId: poll.id }),
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      alert('Failed to reset: ' + err.error);
+      setLoading(false);
+    } else {
+      await fetchPoll();
+    }
+  };
+
   const handleSendReminders = async () => {
     setSendingReminders(true);
     setReminderResult(null);
@@ -231,6 +249,18 @@ export default function DateSelection({ profile }: { profile: any }) {
         )}
 
         <AvailabilityGrid dates={poll.dates || []} />
+
+        {profile?.isAdmin && (
+          <div className="pt-4 border-t border-border flex justify-end">
+            <button
+              onClick={handleResetPoll}
+              disabled={loading}
+              className="text-xs border border-red-200 text-red-500 hover:bg-red-50 px-3 py-1.5 rounded-lg font-semibold transition-colors disabled:opacity-50"
+            >
+              Reset Round
+            </button>
+          </div>
+        )}
 
         {profile?.isAdmin && poll.status === 'VOTING' && (() => {
           const respondedIds = new Set((poll.dates || []).flatMap((d: any) => d.responses.map((r: any) => r.userId)));
